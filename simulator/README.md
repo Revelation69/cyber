@@ -80,7 +80,13 @@ docs/                       Review, revised prompt, curriculum, implementation c
 
 The bank is loaded from disk and validated at startup. An attempt stores its own bank snapshot so a later code/bank update does not change an existing exam. SQLite WAL transactions serialize saves and submission. This design targets one host with a persistent local volume; it is not a multi-region or shared-network-filesystem deployment.
 
-## AWS EC2 runbook
+## AWS deployment
+
+This repository is deployed through CloudFormation and GitHub Actions. Use the [infrastructure runbook](../infra/README.md) for the active t3.micro host, persistent disk, OIDC pipeline, backups and rollback. The live app is at [35.178.246.210](http://35.178.246.210).
+
+The manual instructions below are an alternative for a separate standalone host. Do not run them on the pipeline-managed host.
+
+## Alternative manual EC2 runbook
 
 ### 1. Create a host
 

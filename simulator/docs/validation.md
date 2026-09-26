@@ -1,6 +1,6 @@
 # Build validation
 
-Verified locally on 26 September 2026. No AWS resources were created or deployed.
+Verified locally and on AWS on 26 September 2026. See the [deployment record](../../infra/deployment.md) for the live infrastructure and pipeline evidence.
 
 ## Automated checks
 
@@ -40,4 +40,4 @@ It created its own attempt, saved answers/flags/navigation/RAID progress, restar
 
 ## Limits of validation
 
-These checks establish local functional behavior, not certification validity, exhaustive curriculum coverage, a full accessibility audit, public-service load capacity, or an AWS deployment. The runbook's EC2 installation commands are based on Docker/AWS documentation and have not been executed on an EC2 instance. Retry controls are implemented; prolonged offline operation and all possible multi-tab timing sequences were not exhaustively exercised. Use HTTPS and deployment-appropriate access controls before wider public use.
+These checks establish functional behavior, not certification validity, exhaustive curriculum coverage, a full accessibility audit or public-service load capacity. The CloudFormation/GitHub Actions deployment was exercised on Amazon Linux 2023; the alternative manual Ubuntu/Compose runbook was not used on that host. Retry controls are implemented; prolonged offline operation and all possible multi-tab timing sequences were not exhaustively exercised. Use HTTPS and deployment-appropriate access controls before wider public use.

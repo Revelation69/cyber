@@ -1,0 +1,32 @@
+# Deployment record — 26 September 2026
+
+Live app: **http://35.178.246.210**
+
+Repository: [Revelation69/cyber](https://github.com/Revelation69/cyber). Local checkout: /Users/michaelajala/Documents/cyber; simulator source is under simulator/.
+
+| Resource | Value |
+| --- | --- |
+| Account / region | 727646487479 / eu-west-2 |
+| CloudFormation stack | core1-simulator — CREATE_COMPLETE |
+| Instance | i-0dbcc0971f64573d0 — t3.micro, Amazon Linux 2023 |
+| Elastic IP | 35.178.246.210 |
+| Retained data volume | vol-0d9d0dbb14934f251 — 8 GiB encrypted gp3 |
+| ECR repository | 727646487479.dkr.ecr.eu-west-2.amazonaws.com/core1-simulator-simulator |
+| Deployment role | core1-simulator-DeploymentRole-GlSqwyrKV6l9 |
+| SSM deployment document | core1-simulator-DeployDocument-X3KYNhG0GTLU |
+
+## Verified release
+
+- [Initial CI](https://github.com/Revelation69/cyber/actions/runs/36261582482): passed, deployment deliberately gated during provisioning.
+- [First live release](https://github.com/Revelation69/cyber/actions/runs/36262062968): test and deploy jobs passed, including OIDC authentication, ECR publication, SSM deployment and public health verification.
+- Initial source commit: a03d90628dbf7641c74bf575ea4768366987f931.
+- Initial image digest: sha256:bf99ae8594f4d1796d92abfde7bf2eaef0f0f18527d5ade55932ddb6932d2a25.
+- The public HTTP smoke test passed: 90 questions without pre-submission answer leakage, saves, flags, navigation, timer, RAID state, scoring/report and immutable submission.
+- Browser verification reached the public overview and active exam, and saved a completed router configuration with a review flag.
+- SSM confirmed the bootstrap-complete marker, the dedicated disk mounted at /var/lib/core1, and the running Caddy proxy.
+
+Repository Actions variables are configured and deployment is enabled. Future main-branch changes to app/infrastructure/pipeline paths trigger checks and an application release. Infrastructure changes still require a separate reviewed CloudFormation operation.
+
+The operator's pre-existing local AWS default profile was used for provisioning; it identifies as the account root. No credentials were copied to the repository or GitHub. Routine deployments use the scoped OIDC role. Use an IAM Identity Center/SSO operator profile for subsequent infrastructure administration.
+
+This is the requested initial public-IP HTTP deployment. Free Tier credits/coverage remain unconfirmed. See the [runbook](README.md) for the approximately $14/month baseline estimate, local backup limits, rollback and cleanup instructions. Current release status and image digests are available in subsequent GitHub Actions run summaries.

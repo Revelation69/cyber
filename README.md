@@ -1,5 +1,7 @@
 # Cyber learning projects
 
+**Live simulator: [Open Core 1 Lab](http://35.178.246.210)** · [Deployment record](infra/deployment.md)
+
 - [Academy capstone](Project_01.md): the existing infrastructure and security project brief.
 - [Core 1 simulator](simulator/README.md): a complete legacy 220-1101 practice app with 90 questions and five interactive labs.
 - [AWS deployment](infra/README.md): infrastructure, GitHub Actions, operations, rollback and costs.

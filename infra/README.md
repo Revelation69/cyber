@@ -2,6 +2,8 @@
 
 Target: account **727646487479**, **eu-west-2**, stack **core1-simulator**. The initial service uses HTTP on an Elastic IP. It contains practice exams, with no login or payment flow. A single host is appropriate for a small learning project; it is not highly available.
 
+See the [deployment record](deployment.md) for the live URL, resource IDs and verified release.
+
 ## Resources and cost
 
 CloudFormation creates a t3.micro (1 GiB RAM, standard CPU credits), an encrypted 8 GiB root disk, an encrypted 8 GiB data disk, one public IPv4 address, a private ECR image repository, a VPC, and scoped IAM/Systems Manager resources. Only port 80 is open; there is no SSH ingress. Session Manager provides administration. IMDSv2 is required.
