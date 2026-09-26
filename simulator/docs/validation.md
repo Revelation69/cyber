@@ -1,0 +1,43 @@
+# Build validation
+
+Verified locally on 26 September 2026. No AWS resources were created or deployed.
+
+## Automated checks
+
+- **17 behavioral tests passed** with `.venv/bin/python -m unittest discover -s tests -v`.
+- Bank validation passed: 90 unique items, five labs, 70 single-answer and 15 multiple-response questions; total domain counts 14/18/22/10/26.
+- The scoring tests verified 100 for no credit, 900 for a perfect attempt, 674 below threshold, exactly 675 passing, and pilot answers having zero overall/domain score impact.
+- Tests covered exact-set multiple response, partial PBQ credit, VM host limits, ordered RAID actions, rejection of forged milestones, invalid input rollback, same-origin/JSON guards, session isolation, concurrent saves, server-controlled expiry, immutable reports and persistence across app instances.
+- Public question responses and static paths were checked for private answer/rubric/pilot leakage before submission.
+- JavaScript syntax and Python byte-compilation passed. Frontend source was formatted with Prettier.
+
+## Browser checks
+
+The running application was exercised in the Codex in-app browser:
+
+- Start an exam; complete router and enterprise Wi-Fi fields; flag and navigate through the question grid.
+- Run RAID help, status, inventory, identify, replacement and rebuild commands; verify the completed milestones.
+- Configure all three VMs; observe the host-budget warning at 22/16 vCPUs, then return to an allowed allocation.
+- Complete the POST diagnosis using its supplied legend.
+- Save single-answer and multiple-response items; verify a third selection is rejected when two are required.
+- Navigate back and reload to verify saved answers, flags and current question.
+- Start a fresh attempt, clear a previously saved field using keyboard selection/backspace, navigate away/back, and verify the cleared value stays cleared.
+- Submit with unanswered questions and a review flag; inspect the scaled score, five domain bars, answer explanations, and a separate attempt with partial lab credit.
+- Inspect desktop (1280 px) and mobile (390 px) layouts; mobile document width matched the viewport without horizontal overflow.
+- No browser warning/error logs were observed during the exercised flows.
+
+## Container checks
+
+`docker compose build` succeeded using Python 3.11 and the pinned dependency lock. The running container reported healthy, served `/healthz`, and ran as UID/GID 10001 with the Compose read-only filesystem and persistent volume. A startup control-socket path warning was corrected by placing the Gunicorn control socket in `/tmp`.
+
+The real HTTP smoke test passed against the local container:
+
+```bash
+.venv/bin/python tests/smoke_http.py --base-url http://127.0.0.1:8081 --restart-container
+```
+
+It created its own attempt, saved answers/flags/navigation/RAID progress, restarted the container, and verified the original deadline and saved state survived. Submission returned a 90-item review and five domains; repeated submission and stale answer changes left the report unchanged.
+
+## Limits of validation
+
+These checks establish local functional behavior, not certification validity, exhaustive curriculum coverage, a full accessibility audit, public-service load capacity, or an AWS deployment. The runbook's EC2 installation commands are based on Docker/AWS documentation and have not been executed on an EC2 instance. Retry controls are implemented; prolonged offline operation and all possible multi-tab timing sequences were not exhaustively exercised. Use HTTPS and deployment-appropriate access controls before wider public use.

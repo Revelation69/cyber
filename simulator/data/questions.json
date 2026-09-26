@@ -1,0 +1,3114 @@
+[
+  {
+    "id": "pbq-1",
+    "kind": "pbq",
+    "domain": 2,
+    "title": "Refresh the branch router",
+    "prompt": "Complete the approved change ticket on a training router. Replace the default network name with Cedar-Office, use WPA3-Personal, disable SSID broadcasting as this ticket requests, and reserve 192.168.40.25 for printer MAC 02:11:22:33:44:55.",
+    "lab": "router",
+    "briefing": [
+      "All clients support WPA3-Personal. A strong passphrase is already provisioned and is outside this exercise.",
+      "LAN: 192.168.40.0/24; gateway: 192.168.40.1; DHCP dynamic pool: .100–.200. The reservation address .25 is available and this router supports reservations outside the dynamic pool.",
+      "The printer uses the fixed MAC supplied in the ticket. Enter its address, not the router WAN address.",
+      "Disabling SSID broadcast satisfies this fictional ticket only; it does not make a wireless network secure or undiscoverable."
+    ],
+    "fields": [
+      {
+        "id": "ssid",
+        "label": "Wireless network name (SSID)",
+        "type": "text"
+      },
+      {
+        "id": "security",
+        "label": "Wireless security",
+        "type": "select",
+        "options": [
+          {
+            "value": "wep",
+            "label": "WEP"
+          },
+          {
+            "value": "wpa2-personal",
+            "label": "WPA2-Personal"
+          },
+          {
+            "value": "wpa3-personal",
+            "label": "WPA3-Personal"
+          },
+          {
+            "value": "open",
+            "label": "Open"
+          }
+        ]
+      },
+      {
+        "id": "broadcast",
+        "label": "Broadcast SSID",
+        "type": "select",
+        "options": [
+          {
+            "value": "enabled",
+            "label": "Enabled"
+          },
+          {
+            "value": "disabled",
+            "label": "Disabled"
+          }
+        ]
+      },
+      {
+        "id": "reservation_mac",
+        "label": "Printer MAC address",
+        "type": "text"
+      },
+      {
+        "id": "reservation_ip",
+        "label": "Reserved IPv4 address",
+        "type": "text"
+      }
+    ],
+    "expected": {
+      "ssid": "Cedar-Office",
+      "security": "wpa3-personal",
+      "broadcast": "disabled",
+      "reservation_mac": "02:11:22:33:44:55",
+      "reservation_ip": "192.168.40.25"
+    },
+    "weight": 50,
+    "explanation": "The ticket requires Cedar-Office, WPA3-Personal, broadcast disabled, and a DHCP reservation binding 02:11:22:33:44:55 to 192.168.40.25. A reservation makes the DHCP server assign a predictable address. Hidden SSIDs do not provide access control; WPA3 and a strong passphrase provide the relevant protection.",
+    "reference": "Current router configuration\nSSID: router-default\nSecurity: WEP\nSSID broadcast: Enabled\nPrinter DHCP reservation: None"
+  },
+  {
+    "id": "pbq-2",
+    "kind": "pbq",
+    "domain": 3,
+    "title": "Recover a degraded array",
+    "prompt": "Use the simulated RAID console to inspect a three-drive RAID 5 array, identify its failed drive by serial number, replace only that drive with compatible spare SN-E505, and start a rebuild. Follow the required order: inspect status, identify, replace, rebuild.",
+    "lab": "raid",
+    "briefing": [
+      "This is a mock training CLI, not diskpart, mdadm, or a real operating-system shell. No command changes your computer.",
+      "A verified backup exists, maintenance is approved, and the enclosure supports hot replacement. All members and the spare have compatible capacity and type.",
+      "Use raid status and raid drives to discover the failed serial. Available commands are help, raid status, raid drives, raid identify <failed-serial>, raid replace <failed-serial> <spare-serial>, raid rebuild, and clear.",
+      "Diagnose before identifying; identify the failed serial before replacing; replace before rebuilding. Do not remove a healthy member."
+    ],
+    "fields": [],
+    "expected": {
+      "diagnosed": true,
+      "identified": true,
+      "replaced": true,
+      "rebuilt": true
+    },
+    "weight": 50,
+    "explanation": "Inspect raid status, identify failed SN-B204 (raid identify SN-B204), replace it with SN-E505 (raid replace SN-B204 SN-E505), then run raid rebuild. RAID 5 tolerates one member failure; removing a second member risks data loss. RAID redundancy is not a backup. Real controller procedures and rebuild monitoring vary.",
+    "reference": "Mock inventory: SN-A103 active, SN-B204 failed, SN-C305 active; compatible spare SN-E505. Serial numbers are fictional."
+  },
+  {
+    "id": "pbq-3",
+    "kind": "pbq",
+    "domain": 1,
+    "title": "Deploy an enterprise Wi-Fi profile",
+    "prompt": "Complete both parts of the deployment ticket: on the managed mobile client, use SSID Cedar-Corp, outer EAP method PEAP, inner method MSCHAPv2, and enabled server certificate validation; in the AP/controller AAA panel, point RADIUS to 10.20.0.15.",
+    "lab": "wifi",
+    "briefing": [
+      "The existing WLAN uses WPA2-Enterprise. This legacy compatibility exercise explicitly requires PEAP/MSCHAPv2; do not substitute a different EAP method.",
+      "Cedar Root CA is already installed, and the profile is already restricted to the certificate name radius.cedar.example. Keep server certificate validation enabled.",
+      "The RADIUS address below belongs to the AP/controller AAA configuration. Ordinary Wi-Fi clients do not select a RADIUS server IP directly.",
+      "Credentials and the AP/controller RADIUS shared secret are preprovisioned. No real password is requested."
+    ],
+    "fields": [
+      {
+        "id": "ssid",
+        "label": "Client SSID",
+        "type": "text",
+        "group": "Mobile client profile"
+      },
+      {
+        "id": "eap",
+        "label": "Outer EAP method",
+        "type": "select",
+        "group": "Mobile client profile",
+        "options": [
+          {
+            "value": "peap",
+            "label": "PEAP"
+          },
+          {
+            "value": "eap-tls",
+            "label": "EAP-TLS"
+          },
+          {
+            "value": "eap-ttls",
+            "label": "EAP-TTLS"
+          }
+        ]
+      },
+      {
+        "id": "phase2",
+        "label": "Inner authentication",
+        "type": "select",
+        "group": "Mobile client profile",
+        "options": [
+          {
+            "value": "mschapv2",
+            "label": "MSCHAPv2"
+          },
+          {
+            "value": "pap",
+            "label": "PAP"
+          },
+          {
+            "value": "none",
+            "label": "None"
+          }
+        ]
+      },
+      {
+        "id": "ca_validation",
+        "label": "Validate authentication server certificate",
+        "type": "select",
+        "group": "Mobile client profile",
+        "options": [
+          {
+            "value": "enabled",
+            "label": "Enabled — trust installed Cedar Root CA"
+          },
+          {
+            "value": "disabled",
+            "label": "Disabled — accept any certificate"
+          }
+        ]
+      },
+      {
+        "id": "radius",
+        "label": "RADIUS server IPv4 address",
+        "type": "text",
+        "group": "AP/controller AAA configuration"
+      }
+    ],
+    "expected": {
+      "ssid": "Cedar-Corp",
+      "eap": "peap",
+      "phase2": "mschapv2",
+      "radius": "10.20.0.15",
+      "ca_validation": "enabled"
+    },
+    "weight": 50,
+    "explanation": "The requested client profile uses Cedar-Corp with PEAP and inner MSCHAPv2. Validating the server certificate against the trusted CA and configured server name helps prevent connection to an impostor authentication server. The AP/controller forwards authentication to RADIUS at 10.20.0.15. Certificate-based EAP methods are generally preferable for new deployments; this lab teaches the specified legacy profile."
+  },
+  {
+    "id": "pbq-4",
+    "kind": "pbq",
+    "domain": 4,
+    "title": "Allocate the lab hypervisor",
+    "prompt": "Apply the exact approved allocations for three VMs. The host has 16 physical cores and 64 GiB RAM available to guests after hypervisor overhead. CPU and RAM overcommit are prohibited. Use the ticket values and storage paths below.",
+    "lab": "vms",
+    "briefing": [
+      "Database: exactly 8 vCPU, 32 GiB RAM, disk path /datastores/fast-ssd.",
+      "VDI client: exactly 4 vCPU, 16 GiB RAM, disk path /datastores/fast-ssd.",
+      "Web server: exactly 2 vCPU, 8 GiB RAM, disk path /datastores/general.",
+      "All listed datastores have sufficient free space; /datastores/archive is reserved for offline archives. Paths denote available training datastores, not paths on your computer.",
+      "The ticket totals 14 vCPU and 56 GiB, leaving 2 cores and 8 GiB spare. If either aggregate host limit is exceeded, all CPU and RAM criteria earn zero; storage-path criteria remain independently scored."
+    ],
+    "fields": [
+      {
+        "id": "db_cpu",
+        "label": "vCPU cores",
+        "type": "number",
+        "group": "Database server",
+        "min": 1,
+        "max": 16
+      },
+      {
+        "id": "db_ram",
+        "label": "RAM (GiB)",
+        "type": "number",
+        "group": "Database server",
+        "min": 1,
+        "max": 64
+      },
+      {
+        "id": "db_path",
+        "label": "Virtual-disk storage path",
+        "type": "select",
+        "group": "Database server",
+        "options": [
+          {
+            "value": "/datastores/fast-ssd",
+            "label": "/datastores/fast-ssd"
+          },
+          {
+            "value": "/datastores/general",
+            "label": "/datastores/general"
+          },
+          {
+            "value": "/datastores/archive",
+            "label": "/datastores/archive"
+          }
+        ]
+      },
+      {
+        "id": "vdi_cpu",
+        "label": "vCPU cores",
+        "type": "number",
+        "group": "VDI client",
+        "min": 1,
+        "max": 16
+      },
+      {
+        "id": "vdi_ram",
+        "label": "RAM (GiB)",
+        "type": "number",
+        "group": "VDI client",
+        "min": 1,
+        "max": 64
+      },
+      {
+        "id": "vdi_path",
+        "label": "Virtual-disk storage path",
+        "type": "select",
+        "group": "VDI client",
+        "options": [
+          {
+            "value": "/datastores/fast-ssd",
+            "label": "/datastores/fast-ssd"
+          },
+          {
+            "value": "/datastores/general",
+            "label": "/datastores/general"
+          },
+          {
+            "value": "/datastores/archive",
+            "label": "/datastores/archive"
+          }
+        ]
+      },
+      {
+        "id": "web_cpu",
+        "label": "vCPU cores",
+        "type": "number",
+        "group": "Web server",
+        "min": 1,
+        "max": 16
+      },
+      {
+        "id": "web_ram",
+        "label": "RAM (GiB)",
+        "type": "number",
+        "group": "Web server",
+        "min": 1,
+        "max": 64
+      },
+      {
+        "id": "web_path",
+        "label": "Virtual-disk storage path",
+        "type": "select",
+        "group": "Web server",
+        "options": [
+          {
+            "value": "/datastores/fast-ssd",
+            "label": "/datastores/fast-ssd"
+          },
+          {
+            "value": "/datastores/general",
+            "label": "/datastores/general"
+          },
+          {
+            "value": "/datastores/archive",
+            "label": "/datastores/archive"
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "db_cpu": 8,
+      "db_ram": 32,
+      "db_path": "/datastores/fast-ssd",
+      "vdi_cpu": 4,
+      "vdi_ram": 16,
+      "vdi_path": "/datastores/fast-ssd",
+      "web_cpu": 2,
+      "web_ram": 8,
+      "web_path": "/datastores/general"
+    },
+    "weight": 50,
+    "explanation": "The approved allocations total 14 cores and 56 GiB and fit within 16 cores and 64 GiB. Database and VDI disks use the fast SSD datastore; the web server uses general storage. The lab explicitly prohibits overcommit, although real hypervisors can support it under suitable policies. Meeting host limits alone is insufficient: the individual ticket values must also match."
+  },
+  {
+    "id": "pbq-5",
+    "kind": "pbq",
+    "domain": 5,
+    "title": "Interpret a POST service ticket",
+    "prompt": "A fictional CedarBoard T4 powers on but stops before video output. Its service display shows 0xD3 and repeats three short beeps after a technician replaced a DIMM. Use the supplied model-specific legend to identify the failed subsystem and choose the first appropriate corrective action.",
+    "lab": "post",
+    "briefing": [
+      "The AC outlet, PSU connections, and display have been verified. The system is powered off and disconnected before any internal service.",
+      "Use the supplied CedarBoard T4 legend only. POST codes and beep meanings differ across vendors, firmware versions, and models.",
+      "Select the subsystem indicated by both the display code and the beep pattern, then choose the focused initial repair."
+    ],
+    "fields": [
+      {
+        "id": "component",
+        "label": "Fault subsystem",
+        "type": "select",
+        "options": [
+          {
+            "value": "memory",
+            "label": "System memory (DIMM)"
+          },
+          {
+            "value": "cpu",
+            "label": "CPU"
+          },
+          {
+            "value": "graphics",
+            "label": "Graphics adapter"
+          },
+          {
+            "value": "storage",
+            "label": "Boot storage"
+          }
+        ]
+      },
+      {
+        "id": "remediation",
+        "label": "First remediation",
+        "type": "select",
+        "options": [
+          {
+            "value": "reseat-verify-dimm",
+            "label": "With power disconnected and ESD precautions, reseat the DIMM and verify slot/type compatibility"
+          },
+          {
+            "value": "replace-ssd",
+            "label": "Replace the boot SSD and reinstall the operating system"
+          },
+          {
+            "value": "flash-firmware",
+            "label": "Immediately flash firmware before checking the recently changed DIMM"
+          },
+          {
+            "value": "replace-monitor",
+            "label": "Replace the monitor video cable"
+          }
+        ]
+      }
+    ],
+    "expected": {
+      "component": "memory",
+      "remediation": "reseat-verify-dimm"
+    },
+    "weight": 50,
+    "explanation": "For the fictional supplied legend, 0xD3 with three short beeps indicates memory initialization failure. Because a DIMM was just changed, first disconnect power, use ESD precautions, and check its seating, required slot, and compatibility. An operating-system reinstall cannot fix a pre-boot memory initialization failure.",
+    "reference": "CedarBoard T4 training service legend: 0xC1 / one short beep = CPU initialization fault; 0xD3 / three short beeps = memory initialization fault; 0xE2 / two long beeps = graphics initialization fault; 0xB4 / four short beeps = boot-storage detection fault. These are invented model-specific training codes, not universal POST codes."
+  },
+  {
+    "id": "q-001",
+    "kind": "single",
+    "domain": 1,
+    "title": "A dock that will not drive a monitor",
+    "prompt": "A laptop charges through a USB-C dock and detects its keyboard, but the dock’s DisplayPort output never activates. The dock requires DisplayPort Alternate Mode. Which specification should the technician check first?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Whether the laptop USB-C port supports DisplayPort Alternate Mode"
+      },
+      {
+        "id": "b",
+        "text": "Whether USB-C charging is enabled in the battery utility"
+      },
+      {
+        "id": "c",
+        "text": "Whether the dock received an address from the network DHCP server"
+      },
+      {
+        "id": "d",
+        "text": "Whether the laptop’s built-in display is set to its native resolution"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "USB-C describes a connector, not a guarantee of every protocol. A port can carry charging and USB data without supporting DisplayPort Alternate Mode. The other listed specifications do not establish the required video capability."
+  },
+  {
+    "id": "q-002",
+    "kind": "single",
+    "domain": 1,
+    "title": "Restore laptop memory capacity",
+    "prompt": "A service manual specifies two DDR4 SO-DIMM slots, a 32 GiB maximum, and dual-channel operation with matched modules. One 8 GiB module is installed. Which upgrade provides exactly 16 GiB using both channels?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Install an 8 GiB desktop DDR4 DIMM using the same slot"
+      },
+      {
+        "id": "b",
+        "text": "Install an 8 GiB DDR5 SO-DIMM alongside the existing module"
+      },
+      {
+        "id": "c",
+        "text": "Install a compatible second 8 GiB DDR4 SO-DIMM in the paired slot"
+      },
+      {
+        "id": "d",
+        "text": "Replace the installed module with one 16 GiB DDR4 SO-DIMM only"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "Two compatible 8 GiB SO-DIMMs provide 16 GiB and satisfy the stated matched-channel requirement. A single 16 GiB module meets capacity but not the requested two-channel arrangement. DDR5 and desktop DIMMs are not substitutes for DDR4 SO-DIMMs."
+  },
+  {
+    "id": "q-003",
+    "kind": "multiple",
+    "domain": 1,
+    "title": "Replace a laptop battery safely",
+    "prompt": "A laptop’s internal battery is swollen and pushing the touchpad upward. Select TWO appropriate actions before returning this device to service.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Stop using the laptop, disconnect external power, and arrange approved battery service"
+      },
+      {
+        "id": "b",
+        "text": "Run a full discharge/recharge calibration cycle before taking it out of use"
+      },
+      {
+        "id": "c",
+        "text": "Continue operating on AC power with battery charging limited to 50%"
+      },
+      {
+        "id": "d",
+        "text": "Replace the touchpad first because the swelling is only a mechanical symptom"
+      },
+      {
+        "id": "e",
+        "text": "Handle and dispose of the damaged battery under the manufacturer’s battery-safety procedure"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "a",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "A swollen battery requires the device to be taken out of use and handled under the manufacturer’s service and disposal procedures. Pressure, puncturing, and continued charging can worsen the hazard. Battery recalibration does not reverse physical swelling."
+  },
+  {
+    "id": "q-004",
+    "kind": "single",
+    "domain": 1,
+    "title": "Pair the inventory scanner",
+    "prompt": "A warehouse replaces a handheld scanner. It is powered on, supports Bluetooth, and must pair directly with a tablet. Other scanners already work. What is the best next step?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Create a Wi-Fi profile on the scanner using the warehouse SSID"
+      },
+      {
+        "id": "b",
+        "text": "Assign a static IPv4 address to the scanner before pairing"
+      },
+      {
+        "id": "c",
+        "text": "Put the new scanner into pairing/discoverable mode and select it in the tablet’s Bluetooth settings"
+      },
+      {
+        "id": "d",
+        "text": "Pair the replacement using the retired scanner’s saved Bluetooth identity without discovery"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "Direct Bluetooth pairing requires the peripheral to advertise itself in pairing mode and the tablet to select the correct device. A replacement has its own identity; the old saved pairing does not automatically authorize it. Wi-Fi profiles and IP addresses do not establish Bluetooth pairing."
+  },
+  {
+    "id": "q-005",
+    "kind": "single",
+    "domain": 1,
+    "title": "Enable the mobile workforce",
+    "prompt": "A company needs to push Wi-Fi profiles and business apps to 200 managed tablets, enforce device settings, and remove company data from lost devices. Which solution best fits?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A cloud file-synchronization service with shared folders"
+      },
+      {
+        "id": "b",
+        "text": "A conventional DHCP server with a long lease duration"
+      },
+      {
+        "id": "c",
+        "text": "A remote desktop gateway without device-enrollment features"
+      },
+      {
+        "id": "d",
+        "text": "A mobile device management platform"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "MDM centrally provisions profiles and applications and enforces management policies on enrolled devices. The extent of remote removal depends on enrollment and platform. File synchronization, DHCP, and remote desktop services do not provide the requested device-enrollment and policy controls."
+  },
+  {
+    "id": "q-006",
+    "kind": "single",
+    "domain": 1,
+    "title": "Use a phone as a network connection",
+    "prompt": "An engineer’s laptop needs internet at a site with no Wi-Fi. The phone has an active cellular data plan that permits tethering. Which phone feature allows the laptop to connect over a USB cable?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Wi-Fi Direct without enabling internet sharing"
+      },
+      {
+        "id": "b",
+        "text": "USB file-transfer mode"
+      },
+      {
+        "id": "c",
+        "text": "USB tethering"
+      },
+      {
+        "id": "d",
+        "text": "A mobile VPN profile with tethering disabled"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "USB tethering shares the phone’s cellular connection with a connected computer. USB file-transfer mode only exposes supported data-transfer functions. Wi-Fi Direct and a VPN do not automatically provide the explicitly requested USB internet-sharing connection."
+  },
+  {
+    "id": "q-007",
+    "kind": "multiple",
+    "domain": 1,
+    "title": "Prepare a display replacement",
+    "prompt": "A technician must replace a damaged laptop display assembly. Select TWO sources or checks that best establish a compatible replacement before ordering.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Match only the diagonal size and assume mounting and signaling are identical"
+      },
+      {
+        "id": "b",
+        "text": "Verify panel/assembly dimensions, resolution support, and connector requirements"
+      },
+      {
+        "id": "c",
+        "text": "Match only the connector’s pin count and ignore the model’s approved panels"
+      },
+      {
+        "id": "d",
+        "text": "Choose a higher-resolution panel without verifying system or cable support"
+      },
+      {
+        "id": "e",
+        "text": "Consult the exact laptop model’s service documentation and approved part list"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "b",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "Laptop displays differ in mounting, connectors, signaling, touch support, and electrical requirements. Use the exact service documentation and compatible assembly specifications. Matching only diagonal size or connector pin count does not establish compatibility, and higher resolution is not automatically supported."
+  },
+  {
+    "id": "q-008",
+    "kind": "single",
+    "domain": 1,
+    "title": "Choose contactless data exchange",
+    "prompt": "A visitor badge application asks staff to hold a compatible phone within a few centimeters of a programmed tag to read its identifier. Which technology is being used?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Bluetooth pairing with a device several meters away"
+      },
+      {
+        "id": "b",
+        "text": "An infrared link requiring line of sight"
+      },
+      {
+        "id": "c",
+        "text": "A Wi-Fi Direct session exchanging files across the room"
+      },
+      {
+        "id": "d",
+        "text": "Near-field communication (NFC)"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "NFC supports the very short-range interaction described between a compatible phone and tag. Bluetooth, infrared, and Wi-Fi Direct involve different interfaces and connection behavior; none is implied merely by placing the phone close to this NFC tag."
+  },
+  {
+    "id": "q-009",
+    "kind": "single",
+    "domain": 1,
+    "title": "Restore corporate mail sync",
+    "prompt": "A managed phone receives new personal mail but its corporate mail stopped immediately after the user changed the corporate password. Web access works with the new password. What should the technician check first?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Remove and reinstall the cellular modem driver before checking the account"
+      },
+      {
+        "id": "b",
+        "text": "Whether the corporate account needs reauthentication or updated credentials"
+      },
+      {
+        "id": "c",
+        "text": "Replace the phone’s global DNS settings despite working personal mail"
+      },
+      {
+        "id": "d",
+        "text": "Delete all locally cached corporate mail before checking authentication status"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "The timing and successful personal mail isolate the issue toward the corporate account’s authentication state. Reauthentication is the focused first check. Radio hardware changes are not justified while other network services work."
+  },
+  {
+    "id": "q-010",
+    "kind": "multiple",
+    "domain": 1,
+    "title": "Provide cellular capability",
+    "prompt": "A laptop model has Wi-Fi but no installed WWAN hardware. Staff need native cellular connectivity without phone tethering. Select TWO requirements to verify for an internal WWAN upgrade.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Assume the presence of an empty M.2 socket guarantees support for any WWAN card"
+      },
+      {
+        "id": "b",
+        "text": "A supported carrier service and SIM/eSIM provisioning are available"
+      },
+      {
+        "id": "c",
+        "text": "Purchase a Wi-Fi-only module because Wi-Fi and cellular antennas are interchangeable"
+      },
+      {
+        "id": "d",
+        "text": "Order a SIM card without verifying whether the laptop has a compatible cellular radio"
+      },
+      {
+        "id": "e",
+        "text": "The laptop supports a compatible WWAN module and the required antennas"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "b",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "Internal cellular access requires supported WWAN hardware, suitable antennas, and carrier provisioning. An empty M.2 socket or existing Wi-Fi module does not guarantee WWAN compatibility. Buying a SIM alone cannot add a cellular radio to the laptop."
+  },
+  {
+    "id": "q-011",
+    "kind": "single",
+    "domain": 1,
+    "title": "Connect a legacy projector",
+    "prompt": "A presenter has a laptop with HDMI output and a projector with VGA input only. The projector has no audio capability. Which accessory is appropriate?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A passive HDMI-to-VGA pin adapter with no conversion electronics"
+      },
+      {
+        "id": "b",
+        "text": "An active VGA-source-to-HDMI-display converter that cannot work in reverse"
+      },
+      {
+        "id": "c",
+        "text": "An active HDMI-to-VGA converter compatible with the required resolution"
+      },
+      {
+        "id": "d",
+        "text": "A passive HDMI-to-DVI-D adapter followed by an analog VGA cable"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "HDMI carries digital video and VGA requires analog video, so the signal needs active conversion in the correct direction. A connector shape adapter alone cannot perform digital-to-analog conversion. Converter resolution and power requirements must also be checked."
+  },
+  {
+    "id": "q-012",
+    "kind": "single",
+    "domain": 1,
+    "title": "Keep files available offline",
+    "prompt": "A traveling employee sees file names in a cloud-sync app but cannot open several files without internet. The app marks them as online-only. What should the technician do before the next trip?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Enable synchronization of file names without downloading file contents"
+      },
+      {
+        "id": "b",
+        "text": "Sign out of the synchronization account before verifying local content"
+      },
+      {
+        "id": "c",
+        "text": "Mark the required files for offline availability and confirm they finish downloading"
+      },
+      {
+        "id": "d",
+        "text": "Clear all local cached copies to ensure that the cloud copies are current"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "Online-only placeholders show file metadata without guaranteeing local content. Marking required files for offline availability downloads the content; verify completion and test access before travel. Clearing local copies or signing out does not establish offline access."
+  },
+  {
+    "id": "q-013",
+    "kind": "single",
+    "domain": 1,
+    "title": "Match the replacement drive",
+    "prompt": "A laptop service manual states that its M.2 2280 storage socket supports PCIe NVMe drives only. A technician is ordering a replacement. Which detail is essential in addition to its 2280 size?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The drive uses SATA because matching the M.2 length is sufficient"
+      },
+      {
+        "id": "b",
+        "text": "The drive uses the supported PCIe NVMe interface"
+      },
+      {
+        "id": "c",
+        "text": "The drive uses a compatible length but any M.2 protocol can be substituted"
+      },
+      {
+        "id": "d",
+        "text": "The drive is a 2.5-inch SATA model connected directly to the M.2 socket"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "M.2 specifies a form factor and connector family, while NVMe/PCIe and SATA are different interfaces. The stated socket requires a compatible NVMe drive; a similarly sized M.2 SATA drive is not guaranteed to work."
+  },
+  {
+    "id": "q-014",
+    "kind": "single",
+    "domain": 2,
+    "title": "Keep the label printer at one address",
+    "prompt": "A label printer must receive 192.168.12.40 from DHCP after every reboot. Its MAC address is fixed, the address is available, and this DHCP server supports reservations. Which configuration best meets the request?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Set a shorter DHCP lease so the printer renews more frequently"
+      },
+      {
+        "id": "b",
+        "text": "Create a DNS A record for .40 without controlling the address assignment"
+      },
+      {
+        "id": "c",
+        "text": "Create a DHCP reservation for the printer’s MAC address"
+      },
+      {
+        "id": "d",
+        "text": "Exclude .40 from DHCP but leave the printer dynamically configured with no reservation"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "A DHCP reservation binds an available address to a known client identifier, commonly its MAC address. A shorter lease does not guarantee a fixed assignment. A DNS A record only maps a name to an address, and excluding .40 without a reservation does not assign it to a dynamically configured printer."
+  },
+  {
+    "id": "q-015",
+    "kind": "single",
+    "domain": 2,
+    "title": "Inspect secure web connectivity",
+    "prompt": "A network firewall must permit outbound connections to a vendor’s HTTPS service using its default TCP port. Which destination port should the rule allow?",
+    "options": [
+      {
+        "id": "a",
+        "text": "443"
+      },
+      {
+        "id": "b",
+        "text": "80"
+      },
+      {
+        "id": "c",
+        "text": "25"
+      },
+      {
+        "id": "d",
+        "text": "3389"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "HTTPS conventionally uses TCP 443. TCP 80 is ordinary HTTP, TCP 25 is SMTP server-to-server mail, and TCP 3389 is commonly Remote Desktop. Applications may use custom ports, but this scenario specifies the default."
+  },
+  {
+    "id": "q-016",
+    "kind": "multiple",
+    "domain": 2,
+    "title": "Segment visitors from payroll",
+    "prompt": "A small office shares one managed switching infrastructure. Guest Wi-Fi users need internet access but must not access payroll PCs. Select TWO controls that together meet this requirement.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Place guest traffic in a separate VLAN/subnet"
+      },
+      {
+        "id": "b",
+        "text": "Apply router/firewall rules that deny guest access to internal payroll networks"
+      },
+      {
+        "id": "c",
+        "text": "Use a separate SSID but bridge it into the same unrestricted payroll subnet"
+      },
+      {
+        "id": "d",
+        "text": "Use different DNS suffixes while allowing all traffic between the users"
+      },
+      {
+        "id": "e",
+        "text": "Hide the payroll SSID without applying any network access policy"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "a",
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A separate VLAN/subnet creates a distinct network segment, and routing/firewall policy controls traffic between segments. A VLAN alone does not guarantee isolation if routing permits everything. Different SSIDs or DNS suffixes do not enforce access restrictions when traffic is otherwise bridged or allowed."
+  },
+  {
+    "id": "q-017",
+    "kind": "single",
+    "domain": 2,
+    "title": "Plan three adjacent access points",
+    "prompt": "An office in a regulatory region permitting channels 1–11 deploys three neighboring 2.4 GHz access points with 20 MHz channels. Which channel plan minimizes overlap among these three APs?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Channels 6, 7, and 8"
+      },
+      {
+        "id": "b",
+        "text": "Channels 2, 3, and 4"
+      },
+      {
+        "id": "c",
+        "text": "Channels 1, 6, and 11"
+      },
+      {
+        "id": "d",
+        "text": "Channels 1, 2, and 3"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "For conventional 20 MHz 2.4 GHz planning in the stated channel range, 1, 6, and 11 are the standard nonoverlapping choices. Adjacent channel numbers overlap substantially. Actual channel planning still requires a site survey and local regulatory compliance."
+  },
+  {
+    "id": "q-018",
+    "kind": "single",
+    "domain": 2,
+    "title": "Power a ceiling access point",
+    "prompt": "A ceiling AP requires 802.3at PoE and has no nearby outlet. A proposed switch supports only the lower-power 802.3af budget, which the AP vendor says is insufficient. What is the best solution?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Use an 802.3at-capable switch port or compliant injector with sufficient power budget"
+      },
+      {
+        "id": "b",
+        "text": "Use the existing 802.3af source because every powered device receives identical wattage"
+      },
+      {
+        "id": "c",
+        "text": "Use an arbitrary passive injector because the connector is the same"
+      },
+      {
+        "id": "d",
+        "text": "Connect the AP through an unpowered Ethernet switch to raise the available budget"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "The source must meet the AP’s specified PoE standard and available wattage. A compliant 802.3at source addresses power negotiation and supply. Passive injectors are not interchangeable merely because they use Ethernet connectors."
+  },
+  {
+    "id": "q-019",
+    "kind": "single",
+    "domain": 2,
+    "title": "Recognize a private subnet",
+    "prompt": "A technician is allocating an IPv4 subnet that must remain within the RFC 1918 private ranges. Which proposed host address meets that condition?",
+    "options": [
+      {
+        "id": "a",
+        "text": "198.51.100.10"
+      },
+      {
+        "id": "b",
+        "text": "172.20.15.10"
+      },
+      {
+        "id": "c",
+        "text": "172.32.15.10"
+      },
+      {
+        "id": "d",
+        "text": "169.254.15.10"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "172.20.15.10 lies inside private 172.16.0.0/12, covering 172.16 through 172.31. The 169.254 range is link-local, not RFC 1918. The 198.51.100 range is reserved for documentation, and 172.32 is outside that private block."
+  },
+  {
+    "id": "q-020",
+    "kind": "single",
+    "domain": 2,
+    "title": "Join two different networks",
+    "prompt": "An office has 192.168.8.0/24 and 192.168.9.0/24 on separate VLANs. Hosts need controlled communication between them. Which network function is required?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Layer 3 routing between the subnets"
+      },
+      {
+        "id": "b",
+        "text": "Only Layer 2 switching with no routed VLAN interfaces"
+      },
+      {
+        "id": "c",
+        "text": "A DNS CNAME record pointing one subnet name at the other"
+      },
+      {
+        "id": "d",
+        "text": "A DHCP relay without any inter-subnet routing capability"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "Communication between IP subnets requires a router or a device providing Layer 3 routing, with any required access rules. Layer 2 switching alone does not route between them. DNS resolves names; a DHCP relay assists lease traffic but is not a replacement for the required routing function."
+  },
+  {
+    "id": "q-021",
+    "kind": "single",
+    "domain": 2,
+    "title": "Select a fiber uplink",
+    "prompt": "Two office buildings are 300 meters apart and have strong electrical interference along the route. Which medium is the best choice for a network uplink designed and specified for that distance?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Fiber-optic cable with compatible transceivers rated for the distance"
+      },
+      {
+        "id": "b",
+        "text": "A single 300-meter Cat 6 1000BASE-T cable run without repeaters"
+      },
+      {
+        "id": "c",
+        "text": "A single 300-meter shielded Cat 5e 1000BASE-T cable run without repeaters"
+      },
+      {
+        "id": "d",
+        "text": "Two ordinary copper patch leads joined passively to make one 300-meter run"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "Fiber avoids electrical interference and can support 300 meters with suitable fiber and transceivers. Shielding or a passive coupler does not extend a standard copper 1000BASE-T channel to 300 meters. Distance, optics, fiber type, and installation requirements must all match."
+  },
+  {
+    "id": "q-022",
+    "kind": "multiple",
+    "domain": 2,
+    "title": "Choose two name-resolution records",
+    "prompt": "A DNS administrator is publishing a server’s direct IPv4 and IPv6 addresses under its hostname. Select TWO DNS record types needed.",
+    "options": [
+      {
+        "id": "a",
+        "text": "TXT"
+      },
+      {
+        "id": "b",
+        "text": "PTR"
+      },
+      {
+        "id": "c",
+        "text": "AAAA"
+      },
+      {
+        "id": "d",
+        "text": "A"
+      },
+      {
+        "id": "e",
+        "text": "MX"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "c",
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "A maps a name to an IPv4 address; AAAA maps a name to an IPv6 address. MX identifies mail exchangers, TXT carries text data, and PTR is commonly used for reverse address-to-name lookup."
+  },
+  {
+    "id": "q-023",
+    "kind": "single",
+    "domain": 2,
+    "title": "Inspect a wiring fault",
+    "prompt": "A recently terminated Ethernet link does not establish. The technician wants to check continuity and pin-to-pin wiring before replacing a switch. Which tool is most appropriate?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A toner and probe to identify the cable route without testing all conductors"
+      },
+      {
+        "id": "b",
+        "text": "A cable tester with a wire-map function"
+      },
+      {
+        "id": "c",
+        "text": "A Wi-Fi spectrum analyzer to inspect radio interference"
+      },
+      {
+        "id": "d",
+        "text": "A packet capture on an unrelated working switch port"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A wire-map cable tester checks conductor continuity and termination mapping. It is a focused first tool for suspected cable faults. A toner/probe locates cable paths, while Wi-Fi and packet-analysis tools do not directly verify this pin wiring."
+  },
+  {
+    "id": "q-024",
+    "kind": "single",
+    "domain": 2,
+    "title": "Separate modem and router roles",
+    "prompt": "A cable provider supplies a bridge-mode modem. A household wants several private-address devices to share the public IPv4 connection. Which added function is needed?",
+    "options": [
+      {
+        "id": "a",
+        "text": "An unmanaged switch alone, without any address-sharing router"
+      },
+      {
+        "id": "b",
+        "text": "A router providing NAT/PAT and LAN addressing services"
+      },
+      {
+        "id": "c",
+        "text": "A DNS caching server without routing or NAT capability"
+      },
+      {
+        "id": "d",
+        "text": "A wireless access point in bridge mode only, without a router"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A home router routes LAN traffic and commonly uses NAT/PAT so multiple internal devices can share one public IPv4 address. DHCP can supply LAN configuration. A bridge-mode modem alone does not necessarily perform these router functions."
+  },
+  {
+    "id": "q-025",
+    "kind": "single",
+    "domain": 2,
+    "title": "Identify a mail submission port",
+    "prompt": "An email client must submit mail to its provider using authenticated SMTP with STARTTLS on the standard submission port. Which port should the technician configure?",
+    "options": [
+      {
+        "id": "a",
+        "text": "TCP 587"
+      },
+      {
+        "id": "b",
+        "text": "TCP 143"
+      },
+      {
+        "id": "c",
+        "text": "TCP 110"
+      },
+      {
+        "id": "d",
+        "text": "UDP 161"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "TCP 587 is the standard message submission port and commonly uses STARTTLS. TCP 110 and 143 are associated with retrieving mail via POP3 and IMAP; UDP 161 is commonly SNMP. The question specifies STARTTLS submission, not implicit TLS submission."
+  },
+  {
+    "id": "q-026",
+    "kind": "single",
+    "domain": 2,
+    "title": "Provide reliable remote management",
+    "prompt": "A technician must remotely administer a Linux appliance using an encrypted command-line connection. The appliance uses standard service ports. Which choice is appropriate?",
+    "options": [
+      {
+        "id": "a",
+        "text": "SSH over TCP 22"
+      },
+      {
+        "id": "b",
+        "text": "Telnet over TCP 23"
+      },
+      {
+        "id": "c",
+        "text": "TFTP over UDP 69"
+      },
+      {
+        "id": "d",
+        "text": "HTTP over TCP 80"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "SSH provides encrypted remote shell access and conventionally listens on TCP 22. Telnet does not encrypt its session. TFTP transfers files with minimal features, and ordinary HTTP is not a secure command-line management protocol."
+  },
+  {
+    "id": "q-027",
+    "kind": "single",
+    "domain": 2,
+    "title": "Select a faster nearby wireless band",
+    "prompt": "A dual-band client is in the same room as its AP. The 2.4 GHz band is crowded, while a survey shows spare capacity on 5 GHz. What change is most likely to improve its wireless throughput?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Widen the crowded 2.4 GHz channel without measuring neighboring use"
+      },
+      {
+        "id": "b",
+        "text": "Increase the DHCP lease period to reduce radio contention"
+      },
+      {
+        "id": "c",
+        "text": "Change only the DNS server while leaving the congested radio connection unchanged"
+      },
+      {
+        "id": "d",
+        "text": "Connect the client to the supported 5 GHz network"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "A supported 5 GHz connection can reduce contention in this explicitly surveyed environment. Distance, obstacles, and client capabilities still matter. Widening an already crowded 2.4 GHz channel may increase interference, while DHCP lease duration and DNS changes do not remove radio congestion."
+  },
+  {
+    "id": "q-028",
+    "kind": "multiple",
+    "domain": 2,
+    "title": "Connect to a hidden training WLAN",
+    "prompt": "A training WLAN deliberately suppresses its SSID in beacons. Its administrator has supplied the SSID and WPA2-Personal passphrase. Select TWO pieces of configuration needed when manually adding the client profile.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Supply the correct network passphrase"
+      },
+      {
+        "id": "b",
+        "text": "Configure WPA2-Enterprise with a RADIUS password instead of the supplied personal mode"
+      },
+      {
+        "id": "c",
+        "text": "Enter the AP’s management login password instead of the supplied WLAN passphrase"
+      },
+      {
+        "id": "d",
+        "text": "Leave the SSID blank so the hidden network can automatically supply its name"
+      },
+      {
+        "id": "e",
+        "text": "Enter the exact network SSID and matching security type"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "a",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "The manually added personal WLAN profile needs the exact SSID, matching security configuration, and supplied passphrase. Enterprise authentication is a different configuration, and an AP management password is a separate credential. Suppressing the SSID does not secure or conceal the WLAN from discovery."
+  },
+  {
+    "id": "q-029",
+    "kind": "single",
+    "domain": 2,
+    "title": "Inspect default-gateway configuration",
+    "prompt": "A workstation is 10.44.6.30/24 and must reach other networks through router 10.44.6.1. Which default-gateway address should it use?",
+    "options": [
+      {
+        "id": "a",
+        "text": "10.44.6.255"
+      },
+      {
+        "id": "b",
+        "text": "127.0.0.1"
+      },
+      {
+        "id": "c",
+        "text": "10.44.6.1"
+      },
+      {
+        "id": "d",
+        "text": "10.44.7.1"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "The supplied router interface 10.44.6.1 is reachable on the workstation’s local /24 and provides the requested route. .255 is that subnet’s broadcast address, 10.44.7.1 is outside the local subnet, and loopback points to the workstation itself."
+  },
+  {
+    "id": "q-030",
+    "kind": "single",
+    "domain": 2,
+    "title": "Replace the office firewall",
+    "prompt": "A replacement firewall must decide whether to allow return traffic by remembering outbound connections. Which capability most directly provides this behavior?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Stateless filtering that evaluates each packet independently with no connection table"
+      },
+      {
+        "id": "b",
+        "text": "Stateful packet inspection"
+      },
+      {
+        "id": "c",
+        "text": "An unmanaged switch’s MAC address forwarding table"
+      },
+      {
+        "id": "d",
+        "text": "A DNS cache that remembers recently resolved hostnames"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A stateful firewall tracks connection state and uses it when evaluating packets, including associated return traffic. An unmanaged switch learns MAC forwarding locations but does not provide the same connection-state firewall policy."
+  },
+  {
+    "id": "q-031",
+    "kind": "single",
+    "domain": 3,
+    "title": "Size mirrored storage",
+    "prompt": "A workstation needs a two-drive array that remains available after either single drive fails. It has two 2 TB disks. Which configuration meets the requirement, and what approximate raw usable capacity results?",
+    "options": [
+      {
+        "id": "a",
+        "text": "RAID 1, approximately 2 TB before formatting"
+      },
+      {
+        "id": "b",
+        "text": "RAID 5, approximately 4 TB using only those two disks"
+      },
+      {
+        "id": "c",
+        "text": "RAID 0, approximately 4 TB before formatting"
+      },
+      {
+        "id": "d",
+        "text": "RAID 1, approximately 4 TB before formatting"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "RAID 1 mirrors the two drives, leaving approximately one drive’s capacity usable. RAID 0 stripes for capacity/performance without drive-failure tolerance. A conventional RAID 5 set needs at least three members. No RAID level replaces backups."
+  },
+  {
+    "id": "q-032",
+    "kind": "multiple",
+    "domain": 3,
+    "title": "Match a CPU upgrade",
+    "prompt": "A technician wants to upgrade a desktop processor while keeping its motherboard. Select TWO checks most directly needed before purchase.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Check only the socket shape and disregard the firmware support list"
+      },
+      {
+        "id": "b",
+        "text": "Verify CPU support in the motherboard vendor’s socket/chipset/firmware compatibility list"
+      },
+      {
+        "id": "c",
+        "text": "Verify the cooling system and power delivery support the chosen processor"
+      },
+      {
+        "id": "d",
+        "text": "Assume equal core counts guarantee identical thermal and power requirements"
+      },
+      {
+        "id": "e",
+        "text": "Select the processor solely by its clock speed regardless of chipset compatibility"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "b",
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "A matching socket alone does not guarantee chipset or firmware support. The processor also needs suitable power delivery and cooling. Core count and advertised clock speed cannot establish electrical, thermal, or firmware compatibility with the motherboard."
+  },
+  {
+    "id": "q-033",
+    "kind": "single",
+    "domain": 3,
+    "title": "Equip a compact desktop",
+    "prompt": "A small-form-factor desktop accepts only half-height expansion brackets and has a limited power budget. Which characteristic is most important when selecting an add-in network card?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Any full-height card using the same PCIe protocol, regardless of bracket fit"
+      },
+      {
+        "id": "b",
+        "text": "A compatible low-profile card and bracket within the system’s slot and power specifications"
+      },
+      {
+        "id": "c",
+        "text": "A low-profile card that requires more lanes or power than the system supports"
+      },
+      {
+        "id": "d",
+        "text": "A network card selected solely by link speed without checking chassis clearance"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "The card must fit the available slot, chassis height, and power limits. A compatible low-profile bracket is necessary in this chassis, but low profile alone does not guarantee electrical support. Link speed does not override slot, power, or clearance requirements."
+  },
+  {
+    "id": "q-034",
+    "kind": "single",
+    "domain": 3,
+    "title": "Identify the working memory requirement",
+    "prompt": "A graphics workstation frequently pages to its SSD while processing large projects. CPU utilization is modest, and monitoring shows physical memory almost full. Which upgrade most directly addresses that bottleneck?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Install a faster network card for locally stored projects"
+      },
+      {
+        "id": "b",
+        "text": "Replace the CPU solely because it has the highest advertised clock speed"
+      },
+      {
+        "id": "c",
+        "text": "Replace the SSD with a larger model without addressing the memory-capacity shortfall"
+      },
+      {
+        "id": "d",
+        "text": "Increase compatible system RAM within motherboard limits"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "When the active workload exceeds physical memory, paging can become a bottleneck. Additional compatible RAM can hold more of that working set. The other changes do not increase memory capacity for the project."
+  },
+  {
+    "id": "q-035",
+    "kind": "single",
+    "domain": 3,
+    "title": "Choose a display cable",
+    "prompt": "A desktop and monitor both have DisplayPort connectors. The user needs a digital video connection that can also carry audio to the monitor’s speakers. Which cable meets the stated requirement?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A VGA cable with a passive DisplayPort connector adapter but no signal conversion"
+      },
+      {
+        "id": "b",
+        "text": "A DVI-D cable alone with no separate audio connection"
+      },
+      {
+        "id": "c",
+        "text": "A compatible DisplayPort cable"
+      },
+      {
+        "id": "d",
+        "text": "A 3.5 mm audio cable with no video connection"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "DisplayPort carries digital video and can carry audio when supported by both endpoints. VGA carries analog video without audio. An audio-only cable cannot carry the required video signal."
+  },
+  {
+    "id": "q-036",
+    "kind": "single",
+    "domain": 3,
+    "title": "Understand laser printing",
+    "prompt": "A technician studies why a laser printer’s toner becomes permanently bonded to paper. Which assembly performs that step using heat and pressure?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The transfer roller that moves toner onto the paper"
+      },
+      {
+        "id": "b",
+        "text": "The imaging drum that receives the electrostatic image"
+      },
+      {
+        "id": "c",
+        "text": "The pickup roller that starts feeding the page"
+      },
+      {
+        "id": "d",
+        "text": "The fuser assembly"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "The fuser bonds transferred toner to the paper using heat and pressure. The imaging drum carries the image, the transfer mechanism moves toner to the paper, and pickup rollers feed sheets. Fusers can remain hot and require the vendor’s service precautions."
+  },
+  {
+    "id": "q-037",
+    "kind": "single",
+    "domain": 3,
+    "title": "Select an impact printer",
+    "prompt": "A service counter must print through multipart carbonless forms so duplicate copies are produced in one pass. Which printer technology is most appropriate?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Laser with a multipart-paper setting"
+      },
+      {
+        "id": "b",
+        "text": "Impact dot-matrix"
+      },
+      {
+        "id": "c",
+        "text": "Direct thermal with ordinary carbonless forms"
+      },
+      {
+        "id": "d",
+        "text": "Inkjet with a duplicate-copy setting but no impact mechanism"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "An impact mechanism can transfer pressure through multipart forms. Ordinary laser and inkjet printing do not strike the form to produce those duplicate layers. Direct thermal printers require suitable heat-sensitive media."
+  },
+  {
+    "id": "q-038",
+    "kind": "single",
+    "domain": 3,
+    "title": "Prepare a thermal receipt printer",
+    "prompt": "A direct thermal receipt printer advances paper normally but produces blank receipts immediately after a roll change. Which first check best matches the symptom?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Confirm the correct thermal paper is installed with its heat-sensitive side facing the printhead"
+      },
+      {
+        "id": "b",
+        "text": "Replace an ink cartridge even though the model uses direct thermal printing"
+      },
+      {
+        "id": "c",
+        "text": "Install a new transfer ribbon in this direct thermal model"
+      },
+      {
+        "id": "d",
+        "text": "Reinstall the network driver before checking the newly changed media"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "Direct thermal printing uses heat-sensitive paper rather than ink, toner, or an impact ribbon. Wrong media or reversed loading can cause blank receipts despite normal paper movement. Follow the model’s roll-loading instructions."
+  },
+  {
+    "id": "q-039",
+    "kind": "multiple",
+    "domain": 3,
+    "title": "Budget for a GPU upgrade",
+    "prompt": "A technician is adding a graphics card that requires two PCIe auxiliary power connectors. Select TWO checks needed before approving the existing PSU.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Count unused SATA connectors as proof that the PSU can safely supply the card’s load"
+      },
+      {
+        "id": "b",
+        "text": "Use the PSU’s peak marketing wattage instead of its continuous output specifications"
+      },
+      {
+        "id": "c",
+        "text": "Check sufficient continuous output capacity and appropriate power headroom for the complete system"
+      },
+      {
+        "id": "d",
+        "text": "Check only the graphics card’s power draw and exclude the rest of the system"
+      },
+      {
+        "id": "e",
+        "text": "Check that the PSU provides the card’s required compatible power connectors"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "c",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "The PSU must supply adequate power for the whole system and the connectors required by the GPU. Connector adapters do not establish adequate capacity or suitability. Manufacturer requirements and system load should guide selection."
+  },
+  {
+    "id": "q-040",
+    "kind": "single",
+    "domain": 3,
+    "title": "Use a UPS correctly",
+    "prompt": "An office wants a server to remain powered during brief outages and shut down cleanly during longer ones. Which device best addresses the requirement?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A surge-suppression strip with no battery"
+      },
+      {
+        "id": "b",
+        "text": "A suitably rated UPS with supported shutdown signaling"
+      },
+      {
+        "id": "c",
+        "text": "A rack power-distribution unit with no energy storage"
+      },
+      {
+        "id": "d",
+        "text": "A standby generator without a UPS to bridge its startup interval"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A UPS provides temporary battery power and can coordinate a controlled shutdown when supported and configured. A surge strip may suppress voltage spikes but does not provide backup runtime."
+  },
+  {
+    "id": "q-041",
+    "kind": "multiple",
+    "domain": 3,
+    "title": "Expand SATA storage",
+    "prompt": "A desktop has a free 2.5-inch drive bay and an unused motherboard SATA data port. Which TWO connections does a conventional internal SATA SSD require?",
+    "options": [
+      {
+        "id": "a",
+        "text": "SATA power connection from the PSU"
+      },
+      {
+        "id": "b",
+        "text": "A PCIe auxiliary power connector directly in place of SATA power"
+      },
+      {
+        "id": "c",
+        "text": "A front-panel USB header connected directly to the drive’s SATA data socket"
+      },
+      {
+        "id": "d",
+        "text": "Only the SATA data cable, because it also powers conventional 2.5-inch SATA drives"
+      },
+      {
+        "id": "e",
+        "text": "SATA data connection to the motherboard/controller"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "a",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "A conventional 2.5-inch internal SATA drive uses a SATA data connection and a separate SATA power connector. Its data cable does not supply the required drive power. PCIe auxiliary power and front-panel USB headers are different interfaces and cannot simply replace those connections."
+  },
+  {
+    "id": "q-042",
+    "kind": "single",
+    "domain": 3,
+    "title": "Choose a workstation RAID layout",
+    "prompt": "An editor has four equal disks and wants mirrored pairs combined with striping. The controller supports the required nested RAID level. Which layout is requested?",
+    "options": [
+      {
+        "id": "a",
+        "text": "RAID 5"
+      },
+      {
+        "id": "b",
+        "text": "RAID 10"
+      },
+      {
+        "id": "c",
+        "text": "RAID 0"
+      },
+      {
+        "id": "d",
+        "text": "JBOD spanning"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "RAID 10 stripes across mirrored pairs, combining mirroring with striping. RAID 0 provides no mirror, RAID 5 uses distributed parity, and spanning concatenates capacity. RAID 10 fault tolerance depends on which members fail, so it is not a backup strategy."
+  },
+  {
+    "id": "q-043",
+    "kind": "single",
+    "domain": 3,
+    "title": "Verify a printer media setting",
+    "prompt": "A shared laser printer supports envelopes in its multipurpose tray. A user is printing envelopes with the default plain-paper profile. What should be configured before printing the job?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Use the plain-paper profile because tray selection alone establishes envelope handling"
+      },
+      {
+        "id": "b",
+        "text": "Enable duplex printing even though the printer’s envelope path does not support it"
+      },
+      {
+        "id": "c",
+        "text": "The correct envelope size, media type, and supported tray in the job/printer settings"
+      },
+      {
+        "id": "d",
+        "text": "Select the nearest page size without matching the actual envelope dimensions"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "Laser printers can adjust feeding and fusing behavior for supported media. The job must match the actual envelope size, media type, supported tray, and vendor restrictions. Tray selection alone is insufficient, and unsupported duplexing can cause feeding problems."
+  },
+  {
+    "id": "q-044",
+    "kind": "single",
+    "domain": 3,
+    "title": "Add a high-speed storage controller",
+    "prompt": "A motherboard manual provides a free PCIe x4 slot with the required PCIe generation for a storage controller. Which expansion interface should the technician match?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A conventional PCI slot merely because it is an expansion slot"
+      },
+      {
+        "id": "b",
+        "text": "PCI Express with compatible lane and physical-slot requirements"
+      },
+      {
+        "id": "c",
+        "text": "An M.2 storage socket without a supported adapter or electrical arrangement"
+      },
+      {
+        "id": "d",
+        "text": "A SATA motherboard data port used directly as an expansion-card slot"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "The controller must fit and operate on a suitable PCIe slot, including electrical lane support and motherboard restrictions. Conventional PCI, SATA data ports, and M.2 sockets are different interfaces or form factors; a card cannot be inserted directly into them just because they also connect peripherals."
+  },
+  {
+    "id": "q-045",
+    "kind": "single",
+    "domain": 3,
+    "title": "Interpret power supply efficiency",
+    "prompt": "A 500 W PSU is rated to supply sufficient output power for a workstation. What does its efficiency rating primarily describe?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The maximum continuous DC output rating in watts"
+      },
+      {
+        "id": "b",
+        "text": "A guarantee of constant efficiency at every load and input voltage"
+      },
+      {
+        "id": "c",
+        "text": "How much input electrical power is converted into usable DC output rather than lost as heat"
+      },
+      {
+        "id": "d",
+        "text": "The number of seconds of battery-backed runtime during an outage"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "Efficiency compares useful DC output with AC input under specified test conditions; remaining input energy is primarily lost as heat. It is separate from maximum output capacity and does not mean identical efficiency at all loads. An ordinary PSU does not provide battery runtime."
+  },
+  {
+    "id": "q-046",
+    "kind": "multiple",
+    "domain": 3,
+    "title": "Install an M.2 storage module",
+    "prompt": "A board supports an M.2 2280 NVMe SSD and the technician has a compatible module. Select TWO appropriate installation actions.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Disconnect power and follow ESD-safe handling and the board’s service instructions"
+      },
+      {
+        "id": "b",
+        "text": "Force the module when its key does not align with the socket"
+      },
+      {
+        "id": "c",
+        "text": "Secure the module at a different-length standoff and allow the board to bend"
+      },
+      {
+        "id": "d",
+        "text": "Use the designated 2280 mounting position and secure the module without overtightening"
+      },
+      {
+        "id": "e",
+        "text": "Treat the internal M.2 socket as hot-swappable without documented vendor support"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "a",
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "ESD precautions, disconnected power, proper alignment, and the correct mounting position protect the module and socket. Forcing keyed connectors or leaving the module unsupported can damage it. Internal M.2 modules are not generically hot-swappable."
+  },
+  {
+    "id": "q-047",
+    "kind": "single",
+    "domain": 3,
+    "title": "Use ECC where supported",
+    "prompt": "A server motherboard and CPU explicitly support ECC memory, and its workloads require correction of supported memory bit errors. What type of compatible RAM should be selected?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Compatible non-ECC RAM because a server chassis adds error correction automatically"
+      },
+      {
+        "id": "b",
+        "text": "Non-ECC memory with decorative heat spreaders"
+      },
+      {
+        "id": "c",
+        "text": "Any ECC module regardless of the platform’s supported registered/unbuffered type"
+      },
+      {
+        "id": "d",
+        "text": "ECC RAM of the type approved for that platform"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "ECC memory can detect and correct supported classes of memory errors when the complete platform supports it. The DIMM must also match the platform’s supported type, such as registered or unbuffered memory. A server chassis or heatsink does not add ECC to ordinary non-ECC RAM."
+  },
+  {
+    "id": "q-048",
+    "kind": "single",
+    "domain": 3,
+    "title": "Share an office printer directly",
+    "prompt": "An Ethernet-capable printer must remain reachable when every employee PC is shut down. Which arrangement best meets the requirement?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Share its USB connection through an employee PC that is shut down overnight"
+      },
+      {
+        "id": "b",
+        "text": "Connect the printer to the network and configure a stable address and appropriate print access"
+      },
+      {
+        "id": "c",
+        "text": "Use a USB-only connection to an employee laptop that is often off site"
+      },
+      {
+        "id": "d",
+        "text": "Connect the printer to a switch but configure no usable network address or print service"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A network-attached printer can accept jobs independently of an employee workstation. A printer shared through a PC generally depends on that PC being available. Addressing, permissions, and drivers still need to be configured appropriately."
+  },
+  {
+    "id": "q-049",
+    "kind": "single",
+    "domain": 3,
+    "title": "Match memory generations",
+    "prompt": "A desktop board specifies DDR4 UDIMMs. A replacement module is DDR5, although its capacity is suitable. What should the technician do?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Install DDR5 because matching capacity guarantees generation compatibility"
+      },
+      {
+        "id": "b",
+        "text": "Use a different slot on the same DDR4-only board to accommodate DDR5"
+      },
+      {
+        "id": "c",
+        "text": "Obtain a supported DDR4 UDIMM rather than trying to install the DDR5 module"
+      },
+      {
+        "id": "d",
+        "text": "Update the operating-system driver to convert the DDR4 socket electrically to DDR5"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "DDR generations differ in keying and electrical requirements and are not interchangeable. A supported DDR4 UDIMM is needed for the stated board. Capacity alone does not establish compatibility."
+  },
+  {
+    "id": "q-050",
+    "kind": "single",
+    "domain": 3,
+    "title": "Select a connector for a wired endpoint",
+    "prompt": "A technician is terminating balanced twisted-pair Ethernet cabling for a standard copper network wall jack. Which connector is typically used for the patch cable?",
+    "options": [
+      {
+        "id": "a",
+        "text": "An 8P8C modular connector commonly called RJ45"
+      },
+      {
+        "id": "b",
+        "text": "An RJ11 telephone connector"
+      },
+      {
+        "id": "c",
+        "text": "An LC fiber-optic connector"
+      },
+      {
+        "id": "d",
+        "text": "An F-type coaxial connector"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "Twisted-pair Ethernet patch cables commonly use 8P8C modular plugs referred to as RJ45. RJ11 is commonly telephone wiring, LC is fiber, and F-type is coaxial. The cable and termination must also meet the intended Ethernet category and wiring standard."
+  },
+  {
+    "id": "q-051",
+    "kind": "single",
+    "domain": 3,
+    "title": "Select workstation cooling",
+    "prompt": "A technician installs a CPU cooler according to its instructions. The cooler’s contact surface has no preapplied thermal material. What is needed between the CPU heat spreader and cooler base?",
+    "options": [
+      {
+        "id": "a",
+        "text": "No interface material because the two surfaces appear smooth to the eye"
+      },
+      {
+        "id": "b",
+        "text": "The manufacturer-specified amount and application of thermal interface material"
+      },
+      {
+        "id": "c",
+        "text": "An additional thick layer of thermal material intended to hold the cooler off the heat spreader"
+      },
+      {
+        "id": "d",
+        "text": "A pad of arbitrary thickness without checking cooler contact and vendor requirements"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "Appropriate thermal interface material fills microscopic gaps and improves heat transfer. Use the cooler manufacturer’s specified application and quantity. Excessive material, an unsuitable pad thickness, or no material can impair contact or heat transfer; the material is not intended to space the cooler away from the CPU."
+  },
+  {
+    "id": "q-052",
+    "kind": "single",
+    "domain": 4,
+    "title": "Choose the cloud service layer",
+    "prompt": "A company wants virtual servers in a cloud provider’s data center but intends to manage the guest operating systems and applications itself. Which service model best matches?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Software as a Service (SaaS) where the provider manages the application stack"
+      },
+      {
+        "id": "b",
+        "text": "Platform as a Service (PaaS) where the provider manages the underlying guest OS"
+      },
+      {
+        "id": "c",
+        "text": "A managed desktop application subscription with no guest OS administration"
+      },
+      {
+        "id": "d",
+        "text": "Infrastructure as a Service (IaaS)"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "IaaS supplies infrastructure such as virtual compute, network, and storage while the customer typically manages guest operating systems and applications. SaaS delivers an application with much more of the stack managed by the provider."
+  },
+  {
+    "id": "q-053",
+    "kind": "single",
+    "domain": 4,
+    "title": "Remove application-server maintenance",
+    "prompt": "A small business wants browser-based collaboration software without maintaining the application servers or guest operating systems. Which service model is the closest match?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Infrastructure as a Service with self-managed application VMs"
+      },
+      {
+        "id": "b",
+        "text": "Colocation space for the business’s own self-managed servers"
+      },
+      {
+        "id": "c",
+        "text": "Software as a Service (SaaS)"
+      },
+      {
+        "id": "d",
+        "text": "A hosted physical server with customer-managed operating systems and applications"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "SaaS supplies the application as a service, reducing the customer’s server and application-platform maintenance. The organization still has responsibilities such as account administration, appropriate sharing, and data governance."
+  },
+  {
+    "id": "q-054",
+    "kind": "single",
+    "domain": 4,
+    "title": "Choose a hypervisor type",
+    "prompt": "A dedicated virtualization host boots directly into its hypervisor, which runs guest VMs without a general-purpose desktop operating system beneath it. Which category describes this design?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Type 2 hypervisor running as an application on a desktop OS"
+      },
+      {
+        "id": "b",
+        "text": "An application container runtime sharing a general-purpose host OS kernel"
+      },
+      {
+        "id": "c",
+        "text": "A remote desktop client that displays a session hosted elsewhere"
+      },
+      {
+        "id": "d",
+        "text": "Type 1 hypervisor"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "A Type 1 hypervisor runs directly on the host hardware. A Type 2 hypervisor runs on a host operating system. Remote access software is not itself evidence of a local virtualization platform."
+  },
+  {
+    "id": "q-055",
+    "kind": "multiple",
+    "domain": 4,
+    "title": "Prepare local virtual machines",
+    "prompt": "A technician will run several 64-bit test VMs on a workstation. Select TWO host checks most relevant before installation.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Check supported hardware virtualization and any required firmware enablement"
+      },
+      {
+        "id": "b",
+        "text": "Assume assigning guest RAM never consumes or contends for physical memory"
+      },
+      {
+        "id": "c",
+        "text": "Assume support for 64-bit host software guarantees every hypervisor requirement is met"
+      },
+      {
+        "id": "d",
+        "text": "Check sufficient RAM and storage for the host plus the planned guests"
+      },
+      {
+        "id": "e",
+        "text": "Count only the guest disk sizes and reserve no resources for the host itself"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "a",
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "The hypervisor must be supported by the hardware and firmware configuration, and the host needs memory and storage for itself and its guests. A 64-bit OS alone does not prove all hypervisor requirements are met. Overcommit policies do not create unlimited physical resources."
+  },
+  {
+    "id": "q-056",
+    "kind": "single",
+    "domain": 4,
+    "title": "Isolate a training network",
+    "prompt": "Two benign networking practice VMs must communicate only with each other, with no path to the host or physical LAN. Which virtual network arrangement best matches this requirement?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A bridged adapter on the office LAN"
+      },
+      {
+        "id": "b",
+        "text": "An isolated internal/private virtual switch with no host adapter or uplink"
+      },
+      {
+        "id": "c",
+        "text": "A NAT network that provides internet access"
+      },
+      {
+        "id": "d",
+        "text": "A host-only network that explicitly includes the host"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "An internal/private switch can connect only the specified guests when no host interface or uplink exists. Terminology varies by hypervisor, so the stated connectivity is decisive. Bridged, NAT, and host-only arrangements provide additional paths excluded by this requirement."
+  },
+  {
+    "id": "q-057",
+    "kind": "single",
+    "domain": 4,
+    "title": "Distinguish elasticity from fixed capacity",
+    "prompt": "An online store automatically adds compute instances during a sales event and removes them when traffic falls, under configured limits. Which cloud characteristic is most directly demonstrated?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Rapid elasticity"
+      },
+      {
+        "id": "b",
+        "text": "Measured service without any change in resource allocation"
+      },
+      {
+        "id": "c",
+        "text": "A fixed-capacity reservation that cannot expand or shrink"
+      },
+      {
+        "id": "d",
+        "text": "Desktop virtualization with a permanently fixed number of desktops"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "Elasticity is the ability to expand and contract resources with demand. The scenario explicitly describes both directions. Scaling policies, limits, and costs still need management; elasticity does not imply infinite free capacity."
+  },
+  {
+    "id": "q-058",
+    "kind": "multiple",
+    "domain": 4,
+    "title": "Use a pre-change VM checkpoint",
+    "prompt": "A technician is testing an update on a disposable lab VM and wants a convenient rollback point. Select TWO accurate statements about a typical VM snapshot/checkpoint.",
+    "options": [
+      {
+        "id": "a",
+        "text": "It guarantees recovery when both its base disk and the host datastore are destroyed"
+      },
+      {
+        "id": "b",
+        "text": "It can provide a short-term rollback point supported by the hypervisor"
+      },
+      {
+        "id": "c",
+        "text": "It is always a complete independent copy requiring no base disk"
+      },
+      {
+        "id": "d",
+        "text": "It consumes no additional datastore space as the guest changes"
+      },
+      {
+        "id": "e",
+        "text": "It should not be treated as an independent backup of the host storage"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "b",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "Snapshots/checkpoints can simplify lab rollback but often depend on the base virtual disk and underlying datastore. They consume resources and may affect performance. An independent backup addresses different failure scenarios."
+  },
+  {
+    "id": "q-059",
+    "kind": "single",
+    "domain": 4,
+    "title": "Deploy a private cloud",
+    "prompt": "A company operates pooled, self-service compute resources for only its own organization in its own data center. Which cloud deployment model is the closest fit?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A simple external USB backup disk"
+      },
+      {
+        "id": "b",
+        "text": "Private cloud"
+      },
+      {
+        "id": "c",
+        "text": "Public cloud available to unrelated tenants"
+      },
+      {
+        "id": "d",
+        "text": "Community cloud shared by several separate organizations"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A private cloud is dedicated to one organization and may be operated on or off premises. The stated pooled self-service operation matters: merely owning a server would not by itself establish cloud characteristics."
+  },
+  {
+    "id": "q-060",
+    "kind": "single",
+    "domain": 4,
+    "title": "Read the cloud usage bill",
+    "prompt": "A team is charged for VM runtime and stored data according to reported consumption rather than purchasing a fixed physical server. Which cloud characteristic does the metering illustrate?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Rapid elasticity even if resource allocations never change"
+      },
+      {
+        "id": "b",
+        "text": "Resource pooling without usage measurement"
+      },
+      {
+        "id": "c",
+        "text": "Broad network access regardless of whether consumption is recorded"
+      },
+      {
+        "id": "d",
+        "text": "Measured service"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "Measured service tracks resource consumption for monitoring, reporting, and often billing. It does not remove customer responsibilities or guarantee low costs. Workload usage and pricing determine the bill."
+  },
+  {
+    "id": "q-061",
+    "kind": "single",
+    "domain": 5,
+    "title": "Diagnose faint laser output",
+    "prompt": "A monochrome laser printer produces uniformly faint pages. Toner-save mode is off, paper is correct, and its status page reports very low toner. What is the best next action?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Replace the pickup rollers before addressing the reported toner depletion"
+      },
+      {
+        "id": "b",
+        "text": "Increase the driver’s page resolution as the only action"
+      },
+      {
+        "id": "c",
+        "text": "Reinstall the print driver without addressing the low toner shown on the printer’s own page"
+      },
+      {
+        "id": "d",
+        "text": "Replace the depleted toner cartridge with an approved cartridge and retest"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "Uniform fading with toner-save disabled and a low-toner report supports replacing the depleted cartridge. The printer’s own affected output reduces the likelihood of a workstation-only driver fault. Feed rollers and page-resolution settings do not replenish toner."
+  },
+  {
+    "id": "q-062",
+    "kind": "single",
+    "domain": 5,
+    "title": "Toner rubs off the page",
+    "prompt": "A laser printer uses the correct paper and media setting, but fresh print can be wiped off the page. Which assembly is the most likely source of the fault?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The pickup roller that feeds the first sheet"
+      },
+      {
+        "id": "b",
+        "text": "The imaging drum’s charging mechanism"
+      },
+      {
+        "id": "c",
+        "text": "The paper-separation pad"
+      },
+      {
+        "id": "d",
+        "text": "The fuser"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "Toner that does not bond properly suggests a fusing problem after suitable media and settings have been verified. The fuser applies heat and pressure. Service it only after following the vendor’s shutdown and cooling instructions."
+  },
+  {
+    "id": "q-063",
+    "kind": "multiple",
+    "domain": 5,
+    "title": "Follow the dropped network link",
+    "prompt": "A desk PC shows no Ethernet link light after being moved. Nearby PCs work. Select TWO sensible early checks before changing IP settings.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Change the DNS server before establishing a physical link"
+      },
+      {
+        "id": "b",
+        "text": "Test with a known-good patch cable and an appropriate known-good port"
+      },
+      {
+        "id": "c",
+        "text": "Clear the browser cache to restore the Ethernet link signal"
+      },
+      {
+        "id": "d",
+        "text": "Verify the cable is fully seated at the PC and wall/switch connection"
+      },
+      {
+        "id": "e",
+        "text": "Manually assign a different gateway while leaving a suspect cable in place"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "b",
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "No physical link after a move points first to cabling or port connectivity. Seating and known-good substitutions test that layer. DNS and IP changes cannot repair an unplugged or damaged physical link."
+  },
+  {
+    "id": "q-064",
+    "kind": "single",
+    "domain": 5,
+    "title": "Resolve a self-assigned address",
+    "prompt": "A workstation configured for DHCP has 169.254.84.12/16 and cannot reach its office gateway. Other devices receive valid leases. What should the technician investigate first?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Treat the link-local address as a valid routed office DHCP lease"
+      },
+      {
+        "id": "b",
+        "text": "Why this workstation cannot obtain a DHCP lease on its network path"
+      },
+      {
+        "id": "c",
+        "text": "Change only the DNS suffix while ignoring failure to obtain a lease"
+      },
+      {
+        "id": "d",
+        "text": "Configure the gateway inside 169.254.0.0/16 without checking the office network design"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A 169.254 IPv4 link-local address on a DHCP-configured host commonly indicates that it did not obtain a usable lease. Check the connection, VLAN, DHCP path, and client state. Changing DNS or inventing a link-local gateway does not repair the intended office DHCP assignment."
+  },
+  {
+    "id": "q-065",
+    "kind": "single",
+    "domain": 5,
+    "title": "Separate DNS from connectivity",
+    "prompt": "A PC can reach an internal web server by its IP address, but the server’s hostname fails to resolve. Other PCs resolve that hostname correctly. What should the technician check first?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Replace the local Ethernet cable before checking the working IP path"
+      },
+      {
+        "id": "b",
+        "text": "Change the default gateway despite successful access to the server by IP"
+      },
+      {
+        "id": "c",
+        "text": "Restart the web server before investigating the failing client’s name resolution"
+      },
+      {
+        "id": "d",
+        "text": "The affected PC’s DNS server configuration and name-resolution results"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "Successful access by IP with failed name resolution directs attention to DNS configuration, lookup results, and local cache/hosts entries. It does not by itself indicate a web-server hardware failure. Compare with a working client."
+  },
+  {
+    "id": "q-066",
+    "kind": "single",
+    "domain": 5,
+    "title": "Investigate shutdowns under load",
+    "prompt": "A desktop shuts down during CPU-intensive work. A monitor records temperatures reaching the processor’s documented thermal limit just before shutdown, and the CPU fan is not turning. What is the most appropriate next step?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Disable thermal shutdown to allow the workload to complete"
+      },
+      {
+        "id": "b",
+        "text": "Power down and inspect the CPU fan connection/cooling assembly before further load tests"
+      },
+      {
+        "id": "c",
+        "text": "Raise CPU voltage before fixing the stationary fan"
+      },
+      {
+        "id": "d",
+        "text": "Reinstall the application while leaving the faulty cooling system running"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "The observed thermal limit and stationary fan support a cooling fault. Power down before inspecting or servicing the cooling assembly. Disabling protection or increasing voltage can aggravate overheating; reinstalling the application does not restore a failed cooling fan."
+  },
+  {
+    "id": "q-067",
+    "kind": "single",
+    "domain": 5,
+    "title": "Distinguish display from graphics output",
+    "prompt": "A laptop’s internal screen is dark, but an external monitor shows a normal image. With a flashlight, the technician can faintly see the desktop on the internal panel. Which fault is most consistent?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Failure of the entire graphics subsystem including all output ports"
+      },
+      {
+        "id": "b",
+        "text": "The internal display backlight or its power/control path"
+      },
+      {
+        "id": "c",
+        "text": "A missing boot volume preventing the desktop from loading"
+      },
+      {
+        "id": "d",
+        "text": "A wrong external-monitor input selection as the sole internal-screen fault"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "A visible but unlit image and working external output point toward internal backlight circuitry or its connection. Exact parts depend on the display design. The operating system and some graphics output are demonstrably functioning."
+  },
+  {
+    "id": "q-068",
+    "kind": "single",
+    "domain": 5,
+    "title": "Protect a failing drive’s data",
+    "prompt": "A workstation’s HDD reports repeated read errors and a SMART failure warning. The user has important data not yet backed up. What should the technician prioritize?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Run a full write-intensive benchmark before attempting data preservation"
+      },
+      {
+        "id": "b",
+        "text": "Reformat the drive and then try to recover the user’s files"
+      },
+      {
+        "id": "c",
+        "text": "Stop unnecessary writes and follow the approved data-preservation/recovery process before replacement"
+      },
+      {
+        "id": "d",
+        "text": "Continue normal use until a second diagnostic tool confirms complete failure"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "The priority is preserving the data while minimizing further stress and writes. The correct recovery approach depends on its value, condition, and organizational process; professional recovery may be appropriate. Destructive testing and formatting can eliminate recovery options."
+  },
+  {
+    "id": "q-069",
+    "kind": "single",
+    "domain": 5,
+    "title": "Investigate duplicate addresses",
+    "prompt": "Two PCs intermittently lose network access. Inspection shows that both are manually configured as 192.168.50.22 on the same subnet. What should the technician do?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Keep the same addresses but change one computer’s DNS hostname"
+      },
+      {
+        "id": "b",
+        "text": "Keep the same addresses but configure different default gateways"
+      },
+      {
+        "id": "c",
+        "text": "Change only the subnet mask without planning unique host assignments"
+      },
+      {
+        "id": "d",
+        "text": "Give each device a unique valid address or correctly configured DHCP assignment"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "Two hosts sharing an IPv4 address on one subnet create an address conflict. Each needs a unique valid assignment. Changing only a hostname, gateway, or mask does not establish the two unique host addresses required by this network."
+  },
+  {
+    "id": "q-070",
+    "kind": "single",
+    "domain": 5,
+    "title": "Restore an unresponsive print queue",
+    "prompt": "A network printer successfully prints its own test page, and another PC can print to it. One Windows PC has a stuck job blocking later jobs. What is the best focused initial response?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Cancel the stuck job and inspect/restart that PC’s print queue or spooler as appropriate"
+      },
+      {
+        "id": "b",
+        "text": "Factory-reset the printer before inspecting the affected client queue"
+      },
+      {
+        "id": "c",
+        "text": "Replace the fuser even though other jobs and the test page print correctly"
+      },
+      {
+        "id": "d",
+        "text": "Change the printer’s IP address without updating any configured print ports"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "The printer and network path work for another client, so the affected PC’s queue is the focused starting point. Clearing a stuck job and checking the spooler can restore operation. Broad resets and hardware replacement are not supported by the evidence."
+  },
+  {
+    "id": "q-071",
+    "kind": "single",
+    "domain": 5,
+    "title": "Identify an issue before replacing parts",
+    "prompt": "A user reports that a desktop is sometimes slow. No symptoms have been reproduced and no recent-change history has been gathered. What should the technician do first under a structured troubleshooting process?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Replace the storage drive before collecting usage or symptom information"
+      },
+      {
+        "id": "b",
+        "text": "Implement several performance changes at once before establishing a baseline"
+      },
+      {
+        "id": "c",
+        "text": "Assume insufficient RAM without measuring utilization or affected tasks"
+      },
+      {
+        "id": "d",
+        "text": "Ask about the symptoms, timing, recent changes, and affected tasks to identify the problem"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "First identify and clarify the problem through user input and observations. Evidence guides a probable-cause theory and controlled tests. Unfocused replacements or simultaneous changes obscure the cause and can create new problems."
+  },
+  {
+    "id": "q-072",
+    "kind": "single",
+    "domain": 5,
+    "title": "Investigate multiple pages feeding",
+    "prompt": "A laser printer pulls several sheets at once from one tray. The paper is within specification and is properly loaded. Which part should be inspected first?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The fuser temperature sensor"
+      },
+      {
+        "id": "b",
+        "text": "The imaging drum charge circuit"
+      },
+      {
+        "id": "c",
+        "text": "The separation pad or related feed-separation mechanism"
+      },
+      {
+        "id": "d",
+        "text": "The duplex return path before any sheet enters it"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "A worn separation mechanism can let multiple sheets feed together. Correct paper and loading have already been checked. The fuser and imaging drum act later in the print process and do not normally separate the initial stack of sheets."
+  },
+  {
+    "id": "q-073",
+    "kind": "single",
+    "domain": 5,
+    "title": "Restore a phone charging connection",
+    "prompt": "A phone charges with one known-good approved cable and charger, but not with the user’s usual cable using that same charger. Which component has the strongest evidence against it?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The charger that successfully powers the known-good cable"
+      },
+      {
+        "id": "b",
+        "text": "The phone’s charging port despite stable results with the other cable"
+      },
+      {
+        "id": "c",
+        "text": "The user’s usual charging cable"
+      },
+      {
+        "id": "d",
+        "text": "The battery that charges normally in the controlled working test"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "The controlled substitution changes only the cable while keeping the phone and charger working. That makes the usual cable the leading suspect. Additional testing may locate the exact damage, but replacing unrelated components is not justified."
+  },
+  {
+    "id": "q-074",
+    "kind": "multiple",
+    "domain": 5,
+    "title": "Finish the repair properly",
+    "prompt": "A technician replaced a failed network cable and the workstation now reaches one website. Select TWO appropriate closing steps.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Close the ticket after one unrelated website opens without checking the reported task"
+      },
+      {
+        "id": "b",
+        "text": "Record only that the issue is fixed and omit the tested cause and repair"
+      },
+      {
+        "id": "c",
+        "text": "Document the symptoms, cause, repair, and verification results"
+      },
+      {
+        "id": "d",
+        "text": "Apply additional unrequested changes before confirming the successful repair"
+      },
+      {
+        "id": "e",
+        "text": "Verify the user’s required connectivity and normal operation, including relevant safeguards"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "c",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "Verification should cover the original problem and relevant normal functionality, followed by useful documentation of the work and outcome. One successful website does not necessarily establish that the reported business task is restored."
+  },
+  {
+    "id": "q-075",
+    "kind": "single",
+    "domain": 5,
+    "title": "Find weak wireless coverage",
+    "prompt": "Users lose Wi-Fi only in a new meeting room behind reinforced walls. Wired access works, and the room’s measured Wi-Fi signal is much weaker than nearby areas. What is the best next step?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Perform a coverage/site assessment and adjust AP placement or add a properly planned AP"
+      },
+      {
+        "id": "b",
+        "text": "Change the DNS server to increase the measured radio signal level"
+      },
+      {
+        "id": "c",
+        "text": "Extend the DHCP lease to compensate for attenuation through the walls"
+      },
+      {
+        "id": "d",
+        "text": "Increase only the internet circuit speed while leaving weak radio coverage unchanged"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "The location-specific low signal points to coverage and attenuation. A survey can guide AP placement or additional coverage while considering channels and capacity. DNS settings, DHCP lease time, and a faster internet circuit do not raise the weak radio signal in the room."
+  },
+  {
+    "id": "q-076",
+    "kind": "single",
+    "domain": 5,
+    "title": "Check a boot-device change",
+    "prompt": "A PC reports “no boot device” immediately after a technician adds a blank second SSD. Firmware detects both the original boot SSD and the new SSD. What should be checked first?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Reformat the original boot drive before verifying the selected boot entry"
+      },
+      {
+        "id": "b",
+        "text": "Whether firmware boot order still selects the original boot device/entry"
+      },
+      {
+        "id": "c",
+        "text": "Replace both detected drives without checking firmware boot configuration"
+      },
+      {
+        "id": "d",
+        "text": "Change the partition layout of the original system disk as the first action"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "Both drives are detected and the symptom follows adding a blank drive, so boot order or the selected boot entry is a focused first check. Reformatting the existing system is destructive and unsupported by the evidence."
+  },
+  {
+    "id": "q-077",
+    "kind": "multiple",
+    "domain": 5,
+    "title": "Troubleshoot a recent RAM upgrade",
+    "prompt": "A desktop worked before a RAM upgrade but now fails POST. Select TWO useful initial checks with power disconnected and ESD precautions.",
+    "options": [
+      {
+        "id": "a",
+        "text": "Reseat the modules and test the previous known-good configuration as appropriate"
+      },
+      {
+        "id": "b",
+        "text": "Reinstall the operating system before resolving the POST failure"
+      },
+      {
+        "id": "c",
+        "text": "Raise memory voltage beyond supported limits to force a successful boot"
+      },
+      {
+        "id": "d",
+        "text": "Replace the graphics card before testing the recently changed memory"
+      },
+      {
+        "id": "e",
+        "text": "Confirm the new DIMMs are supported and installed in the required slots"
+      }
+    ],
+    "select_count": 2,
+    "answer": [
+      "a",
+      "e"
+    ],
+    "weight": 6,
+    "explanation": "The recent RAM change and pre-boot failure point to module compatibility, placement, and seating. Returning to a known-good configuration helps isolate the change. An OS reinstall cannot remedy a failure before POST completes."
+  },
+  {
+    "id": "q-078",
+    "kind": "single",
+    "domain": 5,
+    "title": "Distinguish high latency from name failure",
+    "prompt": "A video call becomes choppy while another user saturates a small office’s upload connection with backups. LAN tests are normal and DNS resolves quickly. Which factor should be investigated first?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A DNS lookup delay despite confirmed fast resolution"
+      },
+      {
+        "id": "b",
+        "text": "A display refresh-rate limitation as the cause of WAN packet delay"
+      },
+      {
+        "id": "c",
+        "text": "Insufficient DHCP lease duration despite uninterrupted addressing"
+      },
+      {
+        "id": "d",
+        "text": "WAN uplink congestion and available bandwidth/queue management"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "The correlation with upload saturation and otherwise healthy LAN/DNS points to WAN congestion, which can increase latency and packet loss. Scheduling or shaping backup traffic may help once the bottleneck is confirmed."
+  },
+  {
+    "id": "q-079",
+    "kind": "single",
+    "domain": 5,
+    "title": "Read a POST code correctly",
+    "prompt": "A workstation displays a diagnostic LED code that a web forum calls a RAM fault for a different vendor’s board. What should the technician consult before replacing hardware?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The exact system or motherboard model’s service documentation and code table"
+      },
+      {
+        "id": "b",
+        "text": "A beep-code table for a different board from an unrelated manufacturer"
+      },
+      {
+        "id": "c",
+        "text": "The operating system’s event log as the only source for a pre-boot firmware code"
+      },
+      {
+        "id": "d",
+        "text": "A generic code list without verifying model or firmware applicability"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "a"
+    ],
+    "weight": 6,
+    "explanation": "POST and diagnostic codes are vendor- and model-dependent. The exact service reference prevents replacing the wrong component. A code meaning from an unrelated motherboard cannot safely be assumed to apply."
+  },
+  {
+    "id": "q-080",
+    "kind": "single",
+    "domain": 5,
+    "title": "Check a dim projector",
+    "prompt": "A classroom projector’s picture has grown gradually dimmer, and its lamp-hour warning is active. The lens is clean and brightness settings are correct. What is the best next action?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Change the network MTU before assessing the warned light source"
+      },
+      {
+        "id": "b",
+        "text": "Follow the projector’s service procedure to assess/replace the end-of-life lamp or light source"
+      },
+      {
+        "id": "c",
+        "text": "Replace the working input cable before investigating gradual light-source wear"
+      },
+      {
+        "id": "d",
+        "text": "Increase the source computer’s resolution as a remedy for lamp aging"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "The gradual dimming and lamp-hour warning support service of the light source. The model’s instructions determine whether it is user replaceable and how to cool and handle it. Raising input resolution or changing network settings does not reverse lamp aging."
+  },
+  {
+    "id": "q-081",
+    "kind": "single",
+    "domain": 5,
+    "title": "Inspect a cable speed downgrade",
+    "prompt": "Two gigabit-capable Ethernet endpoints negotiate only 100 Mb/s after a patch cable replacement. Their settings allow auto-negotiation. A known-good cable restores 1 Gb/s. What is the most likely cause?",
+    "options": [
+      {
+        "id": "a",
+        "text": "A DNS configuration error reducing Ethernet link negotiation speed"
+      },
+      {
+        "id": "b",
+        "text": "An application bandwidth limit changing the physical link’s negotiated rate"
+      },
+      {
+        "id": "c",
+        "text": "A duplicate hostname preventing four-pair electrical signaling"
+      },
+      {
+        "id": "d",
+        "text": "The replacement cable or its termination has a fault affecting the pairs required for gigabit Ethernet"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "The controlled cable substitution implicates the replacement cable or termination. 1000BASE-T uses all four pairs, so certain faults may allow a lower-speed link while preventing gigabit operation. A cable test can locate the defect."
+  },
+  {
+    "id": "q-082",
+    "kind": "single",
+    "domain": 5,
+    "title": "Check an unresponsive touchscreen",
+    "prompt": "A tablet displays a normal image but does not register touch in one cracked corner after a drop. An attached input device works. Which subsystem is most directly implicated?",
+    "options": [
+      {
+        "id": "a",
+        "text": "The display backlight alone despite a normal visible image"
+      },
+      {
+        "id": "b",
+        "text": "A wireless network authentication problem"
+      },
+      {
+        "id": "c",
+        "text": "The touch digitizer/screen assembly"
+      },
+      {
+        "id": "d",
+        "text": "A failure of all input processing despite the working attached device"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "c"
+    ],
+    "weight": 6,
+    "explanation": "Localized lost touch after physical damage, while the image and external input work, implicates the touch-sensing assembly. On some devices it is serviced as a complete display assembly. Network services do not explain that localized failure."
+  },
+  {
+    "id": "q-083",
+    "kind": "single",
+    "domain": 5,
+    "title": "Test a proposed fix methodically",
+    "prompt": "A technician suspects a faulty patch cable is causing errors. Which test best isolates that theory?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Replace several network components and reinstall the OS before retesting"
+      },
+      {
+        "id": "b",
+        "text": "Change the default gateway without testing the suspected cable"
+      },
+      {
+        "id": "c",
+        "text": "Declare the cable faulty based only on its jacket color"
+      },
+      {
+        "id": "d",
+        "text": "Replace only that cable with a known-good equivalent and retest the same connection"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "A controlled substitution changes one suspected variable and repeats the observed test. Changing many components simultaneously may restore service but loses evidence about the actual cause and adds unnecessary risk and cost."
+  },
+  {
+    "id": "q-084",
+    "kind": "single",
+    "domain": 5,
+    "title": "Investigate wrong colors on an inkjet",
+    "prompt": "An inkjet prints black text normally but omits most cyan from its built-in nozzle-check pattern. The cyan cartridge has ink and is installed correctly. What should be tried next under the printer’s maintenance procedure?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Change only the computer’s color profile even though the built-in test also fails"
+      },
+      {
+        "id": "b",
+        "text": "Reinstall the network driver before addressing the printer’s internal nozzle test"
+      },
+      {
+        "id": "c",
+        "text": "Replace the paper-feed rollers as the first response to missing cyan nozzles"
+      },
+      {
+        "id": "d",
+        "text": "Run the appropriate printhead/nozzle cleaning cycle and reassess the test pattern"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "d"
+    ],
+    "weight": 6,
+    "explanation": "A built-in nozzle check isolates the symptom from the computer’s document and color settings. Missing cyan nozzles with an installed, supplied cartridge support a manufacturer-approved cleaning cycle, followed by inspection and further service if necessary."
+  },
+  {
+    "id": "q-085",
+    "kind": "single",
+    "domain": 5,
+    "title": "Diagnose an intermittent display cable",
+    "prompt": "An external monitor flickers when its video cable is lightly moved. The same monitor and computer are stable with a known-good cable at the same resolution and refresh rate. What is the best supported repair?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Reinstall the graphics driver before addressing the isolated cable fault"
+      },
+      {
+        "id": "b",
+        "text": "Replace the suspect video cable with a compatible known-good cable"
+      },
+      {
+        "id": "c",
+        "text": "Replace the monitor panel despite stable operation with the known-good cable"
+      },
+      {
+        "id": "d",
+        "text": "Lower the refresh rate permanently without replacing the demonstrated faulty cable"
+      }
+    ],
+    "select_count": 1,
+    "answer": [
+      "b"
+    ],
+    "weight": 6,
+    "explanation": "Movement sensitivity and the controlled cable substitution provide strong evidence for a cable or connector problem. Replace the demonstrated suspect cable with a suitable equivalent. A driver reinstall, monitor replacement, or permanent quality reduction is not supported by the stable known-good test."
+  }
+]

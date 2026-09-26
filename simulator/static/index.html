@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101629" />
+    <meta
+      name="description"
+      content="An independent, full-length CompTIA A+ Core 1 practice exam with five interactive labs."
+    />
+    <title>Core 1 · Exam workspace</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%235c50ee'/%3E%3Cpath d='M20 21H44V29H28V43H20Z' fill='white'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div id="app">
+      <main class="loading-screen" id="main">
+        <span class="loading-dot"></span>
+        <p>Opening your exam workspace…</p>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <dialog id="confirm-dialog" aria-labelledby="dialog-title">
+      <div id="dialog-content"></div>
+    </dialog>
+    <noscript
+      ><p class="noscript">
+        Enable JavaScript to use the exam simulator. Your browser needs
+        JavaScript for the labs and autosave.
+      </p></noscript
+    >
+  </body>
+</html>

@@ -1,0 +1,111 @@
+name: Simulator CI and AWS deployment
+
+on:
+  pull_request:
+    paths: ['simulator/**', 'infra/**', 'scripts/**', '.github/workflows/simulator.yml']
+  push:
+    branches: [main]
+    paths: ['simulator/**', 'infra/**', 'scripts/**', '.github/workflows/simulator.yml']
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: 'Optional existing ECR sha256 digest for a rollback; blank builds this commit'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: simulator-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Install dependencies and infrastructure linter
+        run: |
+          python -m pip install -r simulator/requirements.lock -r infra/requirements.txt
+      - name: Validate application and infrastructure
+        run: |
+          python -m unittest discover -s simulator/tests -v
+          node --check simulator/static/app.js
+          bash -n infra/bootstrap.sh infra/deploy.sh scripts/deploy_image.sh
+          python scripts/render_template.py
+          git diff --exit-code -- infra/cloudformation.json
+          cfn-lint infra/cloudformation.json
+      - name: Build and exercise the production container
+        run: |
+          docker build --tag core1-ci simulator
+          trap 'docker logs --tail=30 core1-ci; docker rm -f core1-ci' EXIT
+          docker run --detach --name core1-ci --publish 127.0.0.1:18080:8080 \
+            --read-only --tmpfs /tmp:size=64m --tmpfs /data:uid=10001,gid=10001,mode=0700,size=32m \
+            --cap-drop ALL --security-opt no-new-privileges:true core1-ci
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:18080/healthz; then break; fi
+            sleep 2
+          done
+          python simulator/tests/smoke_http.py --base-url http://127.0.0.1:18080
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.AWS_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: eu-west-2
+      AWS_ACCOUNT_ID: '727646487479'
+      ECR_REPOSITORY: ${{ vars.AWS_ECR_REPOSITORY }}
+      AWS_INSTANCE_ID: ${{ vars.AWS_INSTANCE_ID }}
+      AWS_DEPLOY_DOCUMENT: ${{ vars.AWS_DEPLOY_DOCUMENT }}
+      APP_URL: ${{ vars.APP_URL }}
+      ROLLBACK_DIGEST: ${{ inputs.image_digest }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Obtain short-lived AWS credentials
+        uses: aws-actions/configure-aws-credentials@3557a071ad648a12260a481c2e613d138d99c690
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-west-2
+          role-session-name: core1-${{ github.run_id }}
+          allowed-account-ids: '727646487479'
+      - name: Build or select the immutable image
+        id: image
+        env:
+          IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          test "$(aws sts get-caller-identity --query Account --output text)" = "$AWS_ACCOUNT_ID"
+          test -n "$ECR_REPOSITORY"
+          repository_name="${ECR_REPOSITORY#*/}"
+          if [ -n "$ROLLBACK_DIGEST" ]; then
+            [[ "$ROLLBACK_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || exit 2
+            digest=$(aws ecr describe-images --repository-name "$repository_name" \
+              --image-ids "imageDigest=$ROLLBACK_DIGEST" --query 'imageDetails[0].imageDigest' --output text)
+          else
+            registry="${ECR_REPOSITORY%%/*}"
+            aws ecr get-login-password | docker login --username AWS --password-stdin "$registry"
+            docker build --tag "$ECR_REPOSITORY:$IMAGE_TAG" simulator
+            docker push "$ECR_REPOSITORY:$IMAGE_TAG"
+            digest=$(aws ecr describe-images --repository-name "$repository_name" \
+              --image-ids "imageTag=$IMAGE_TAG" --query 'imageDetails[0].imageDigest' --output text)
+          fi
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || exit 2
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      - name: Deploy through Systems Manager and verify public health
+        env:
+          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+        run: bash scripts/deploy_image.sh
