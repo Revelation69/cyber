@@ -1,3 +1,7 @@
+# Current scope update — 220-1201
+
+The user corrected the requested exam to 220-1201. The original review below records the initial 220-1101 build. The current implementation supersedes its legacy-blueprint recommendation; see [the current curriculum audit](curriculum.md). Named passing attempts now receive clearly marked mock certificates.
+
 # Review of the supplied simulator prompt
 
 The specification is a useful starting point: a bounded 90-question bank, timed attempt, five practical tasks, and a container deployment. Several requirements need correction before they can support an honest, testable implementation.

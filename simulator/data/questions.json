@@ -3,85 +3,62 @@
     "id": "pbq-1",
     "kind": "pbq",
     "domain": 2,
-    "title": "Refresh the branch router",
-    "prompt": "Complete the approved change ticket on a training router. Replace the default network name with Cedar-Office, use WPA3-Personal, disable SSID broadcasting as this ticket requests, and reserve 192.168.40.25 for printer MAC 02:11:22:33:44:55.",
+    "title": "Restore the branch workstation network",
+    "prompt": "A workstation was moved to the branch LAN and needs a static configuration. Use the network ticket to correct its IPv4 settings and reserve the printer address on the DHCP server.",
     "lab": "router",
     "briefing": [
-      "All clients support WPA3-Personal. A strong passphrase is already provisioned and is outside this exercise.",
-      "LAN: 192.168.40.0/24; gateway: 192.168.40.1; DHCP dynamic pool: .100–.200. The reservation address .25 is available and this router supports reservations outside the dynamic pool.",
-      "The printer uses the fixed MAC supplied in the ticket. Enter its address, not the router WAN address.",
-      "Disabling SSID broadcast satisfies this fictional ticket only; it does not make a wireless network secure or undiscoverable."
+      "LAN: 192.168.40.0/24. Router LAN interface: 192.168.40.1. Approved internal DNS resolver: 192.168.40.53.",
+      "Workstation assignment: the available address ending in .25. Dynamic clients use .100–.200, so this static address is outside the pool.",
+      "The printer uses DHCP and must always receive the available address .60. Its fixed MAC is 02:11:22:33:44:55. This server supports reservations outside its dynamic pool."
     ],
     "fields": [
       {
-        "id": "ssid",
-        "label": "Wireless network name (SSID)",
+        "id": "address",
+        "label": "Workstation IPv4 address",
         "type": "text"
       },
       {
-        "id": "security",
-        "label": "Wireless security",
-        "type": "select",
-        "options": [
-          {
-            "value": "wep",
-            "label": "WEP"
-          },
-          {
-            "value": "wpa2-personal",
-            "label": "WPA2-Personal"
-          },
-          {
-            "value": "wpa3-personal",
-            "label": "WPA3-Personal"
-          },
-          {
-            "value": "open",
-            "label": "Open"
-          }
-        ]
+        "id": "mask",
+        "label": "Subnet mask",
+        "type": "text"
       },
       {
-        "id": "broadcast",
-        "label": "Broadcast SSID",
-        "type": "select",
-        "options": [
-          {
-            "value": "enabled",
-            "label": "Enabled"
-          },
-          {
-            "value": "disabled",
-            "label": "Disabled"
-          }
-        ]
+        "id": "gateway",
+        "label": "Default gateway",
+        "type": "text"
       },
       {
-        "id": "reservation_mac",
-        "label": "Printer MAC address",
+        "id": "dns",
+        "label": "DNS resolver",
         "type": "text"
       },
       {
         "id": "reservation_ip",
-        "label": "Reserved IPv4 address",
+        "label": "Reserved address for printer 02:11:22:33:44:55",
         "type": "text"
       }
     ],
     "expected": {
-      "ssid": "Cedar-Office",
-      "security": "wpa3-personal",
-      "broadcast": "disabled",
-      "reservation_mac": "02:11:22:33:44:55",
-      "reservation_ip": "192.168.40.25"
+      "address": "192.168.40.25",
+      "mask": "255.255.255.0",
+      "gateway": "192.168.40.1",
+      "dns": "192.168.40.53",
+      "reservation_ip": "192.168.40.60"
     },
     "weight": 50,
-    "explanation": "The ticket requires Cedar-Office, WPA3-Personal, broadcast disabled, and a DHCP reservation binding 02:11:22:33:44:55 to 192.168.40.25. A reservation makes the DHCP server assign a predictable address. Hidden SSIDs do not provide access control; WPA3 and a strong passphrase provide the relevant protection.",
-    "reference": "Current router configuration\nSSID: router-default\nSecurity: WEP\nSSID broadcast: Enabled\nPrinter DHCP reservation: None"
+    "explanation": "The workstation needs its allocated .25 address on the 192.168.40.0/24 LAN, a 255.255.255.0 mask, the router’s local interface as gateway and the approved DNS resolver. Reserve .60 for the printer’s fixed MAC. A DNS record alone would not ensure a repeatable DHCP assignment.",
+    "reference": "Current workstation: 192.168.41.25 / 255.255.0.0\nGateway: 192.168.41.1\nDNS: 192.168.41.53\nPrinter reservation: not configured",
+    "objective": "2.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "pbq-2",
     "kind": "pbq",
-    "domain": 3,
+    "domain": 5,
     "title": "Recover a degraded array",
     "prompt": "Use the simulated RAID console to inspect a three-drive RAID 5 array, identify its failed drive by serial number, replace only that drive with compatible spare SN-E505, and start a rebuild. Follow the required order: inspect status, identify, replace, rebuild.",
     "lab": "raid",
@@ -89,7 +66,8 @@
       "This is a mock training CLI, not diskpart, mdadm, or a real operating-system shell. No command changes your computer.",
       "A verified backup exists, maintenance is approved, and the enclosure supports hot replacement. All members and the spare have compatible capacity and type.",
       "Use raid status and raid drives to discover the failed serial. Available commands are help, raid status, raid drives, raid identify <failed-serial>, raid replace <failed-serial> <spare-serial>, raid rebuild, and clear.",
-      "Diagnose before identifying; identify the failed serial before replacing; replace before rebuilding. Do not remove a healthy member."
+      "Diagnose before identifying; identify the failed serial before replacing; replace before rebuilding. Do not remove a healthy member.",
+      "A current verified backup exists. This model supports hot-swap replacement; the console commands are fictional and are explained by help, not real controller syntax to memorize."
     ],
     "fields": [],
     "expected": {
@@ -100,100 +78,141 @@
     },
     "weight": 50,
     "explanation": "Inspect raid status, identify failed SN-B204 (raid identify SN-B204), replace it with SN-E505 (raid replace SN-B204 SN-E505), then run raid rebuild. RAID 5 tolerates one member failure; removing a second member risks data loss. RAID redundancy is not a backup. Real controller procedures and rebuild monitoring vary.",
-    "reference": "Mock inventory: SN-A103 active, SN-B204 failed, SN-C305 active; compatible spare SN-E505. Serial numbers are fictional."
+    "reference": "Mock inventory: SN-A103 active, SN-B204 failed, SN-C305 active; compatible spare SN-E505. Serial numbers are fictional.",
+    "objective": "5.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "pbq-3",
     "kind": "pbq",
     "domain": 1,
-    "title": "Deploy an enterprise Wi-Fi profile",
-    "prompt": "Complete both parts of the deployment ticket: on the managed mobile client, use SSID Cedar-Corp, outer EAP method PEAP, inner method MSCHAPv2, and enabled server certificate validation; in the AP/controller AAA panel, point RADIUS to 10.20.0.15.",
+    "title": "Prepare a managed field tablet",
+    "prompt": "Configure a replacement tablet for a field engineer. Apply the requirements in the ticket using the correct mobile connectivity and application settings.",
     "lab": "wifi",
     "briefing": [
-      "The existing WLAN uses WPA2-Enterprise. This legacy compatibility exercise explicitly requires PEAP/MSCHAPv2; do not substitute a different EAP method.",
-      "Cedar Root CA is already installed, and the profile is already restricted to the certificate name radius.cedar.example. Keep server certificate validation enabled.",
-      "The RADIUS address below belongs to the AP/controller AAA configuration. Ordinary Wi-Fi clients do not select a RADIUS server IP directly.",
-      "Credentials and the AP/controller RADIUS shared secret are preprovisioned. No real password is requested."
+      "The tablet has a built-in eSIM and no removable SIM tray. The contracted carrier has supplied an activation profile; use it for cellular service.",
+      "The engineer needs the company-managed service app and policy enforcement. Personal file sync alone is insufficient.",
+      "A laptop must use the tablet’s cellular plan over a USB cable; the plan permits tethering.",
+      "Cloud documents needed at remote sites must be downloaded before departure. Avoid automatically downloading large app updates over the capped cellular plan."
     ],
     "fields": [
       {
-        "id": "ssid",
-        "label": "Client SSID",
-        "type": "text",
-        "group": "Mobile client profile"
-      },
-      {
-        "id": "eap",
-        "label": "Outer EAP method",
+        "id": "cellular",
+        "label": "Cellular activation",
         "type": "select",
-        "group": "Mobile client profile",
         "options": [
           {
-            "value": "peap",
-            "label": "PEAP"
+            "value": "esim",
+            "label": "Install the carrier eSIM profile"
           },
           {
-            "value": "eap-tls",
-            "label": "EAP-TLS"
+            "value": "physical",
+            "label": "Insert a physical SIM"
           },
           {
-            "value": "eap-ttls",
-            "label": "EAP-TTLS"
+            "value": "bluetooth",
+            "label": "Pair with a Bluetooth headset"
           }
         ]
       },
       {
-        "id": "phase2",
-        "label": "Inner authentication",
+        "id": "management",
+        "label": "Business apps and policy management",
         "type": "select",
-        "group": "Mobile client profile",
         "options": [
           {
-            "value": "mschapv2",
-            "label": "MSCHAPv2"
+            "value": "sync",
+            "label": "Personal cloud file synchronization"
           },
           {
-            "value": "pap",
-            "label": "PAP"
+            "value": "mdm",
+            "label": "Enroll in the company MDM service"
           },
           {
-            "value": "none",
-            "label": "None"
+            "value": "dns",
+            "label": "Change the DNS resolver"
           }
         ]
       },
       {
-        "id": "ca_validation",
-        "label": "Validate authentication server certificate",
+        "id": "sharing",
+        "label": "Laptop internet sharing",
         "type": "select",
-        "group": "Mobile client profile",
         "options": [
           {
-            "value": "enabled",
-            "label": "Enabled — trust installed Cedar Root CA"
+            "value": "files",
+            "label": "USB file-transfer mode"
           },
           {
-            "value": "disabled",
-            "label": "Disabled — accept any certificate"
+            "value": "usb",
+            "label": "USB tethering"
+          },
+          {
+            "value": "nfc",
+            "label": "NFC tag reading"
           }
         ]
       },
       {
-        "id": "radius",
-        "label": "RADIUS server IPv4 address",
-        "type": "text",
-        "group": "AP/controller AAA configuration"
+        "id": "documents",
+        "label": "Required site documents",
+        "type": "select",
+        "options": [
+          {
+            "value": "online",
+            "label": "Keep online-only placeholders"
+          },
+          {
+            "value": "offline",
+            "label": "Download and verify offline availability"
+          },
+          {
+            "value": "delete",
+            "label": "Clear locally cached files"
+          }
+        ]
+      },
+      {
+        "id": "updates",
+        "label": "Large automatic application updates",
+        "type": "select",
+        "options": [
+          {
+            "value": "cellular",
+            "label": "Download over cellular without restriction"
+          },
+          {
+            "value": "wifi",
+            "label": "Restrict automatic downloads to Wi-Fi"
+          },
+          {
+            "value": "never",
+            "label": "Permanently disable all app updates"
+          }
+        ]
       }
     ],
     "expected": {
-      "ssid": "Cedar-Corp",
-      "eap": "peap",
-      "phase2": "mschapv2",
-      "radius": "10.20.0.15",
-      "ca_validation": "enabled"
+      "cellular": "esim",
+      "management": "mdm",
+      "sharing": "usb",
+      "documents": "offline",
+      "updates": "wifi"
     },
     "weight": 50,
-    "explanation": "The requested client profile uses Cedar-Corp with PEAP and inner MSCHAPv2. Validating the server certificate against the trusted CA and configured server name helps prevent connection to an impostor authentication server. The AP/controller forwards authentication to RADIUS at 10.20.0.15. Certificate-based EAP methods are generally preferable for new deployments; this lab teaches the specified legacy profile."
+    "explanation": "Install the supplied carrier eSIM profile, enroll in MDM for business apps/policies, use USB tethering for the laptop, make required files available offline and restrict large automatic updates to Wi-Fi. A physical SIM is incompatible with the stated tablet; Bluetooth pairing or file-transfer mode alone does not provide the requested USB internet sharing.",
+    "reference": "Ticket: existing Wi-Fi and Bluetooth work normally. Device hardware, carrier coverage and tethering entitlement have been verified.",
+    "objective": "1.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4",
+      "apple-esim"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "pbq-4",
@@ -331,7 +350,13 @@
       "web_path": "/datastores/general"
     },
     "weight": 50,
-    "explanation": "The approved allocations total 14 cores and 56 GiB and fit within 16 cores and 64 GiB. Database and VDI disks use the fast SSD datastore; the web server uses general storage. The lab explicitly prohibits overcommit, although real hypervisors can support it under suitable policies. Meeting host limits alone is insufficient: the individual ticket values must also match."
+    "explanation": "The approved allocations total 14 cores and 56 GiB and fit within 16 cores and 64 GiB. Database and VDI disks use the fast SSD datastore; the web server uses general storage. The lab explicitly prohibits overcommit, although real hypervisors can support it under suitable policies. Meeting host limits alone is insufficient: the individual ticket values must also match.",
+    "objective": "4.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "pbq-5",
@@ -399,7 +424,13 @@
     },
     "weight": 50,
     "explanation": "For the fictional supplied legend, 0xD3 with three short beeps indicates memory initialization failure. Because a DIMM was just changed, first disconnect power, use ESD precautions, and check its seating, required slot, and compatibility. An operating-system reinstall cannot fix a pre-boot memory initialization failure.",
-    "reference": "CedarBoard T4 training service legend: 0xC1 / one short beep = CPU initialization fault; 0xD3 / three short beeps = memory initialization fault; 0xE2 / two long beeps = graphics initialization fault; 0xB4 / four short beeps = boot-storage detection fault. These are invented model-specific training codes, not universal POST codes."
+    "reference": "CedarBoard T4 training service legend: 0xC1 / one short beep = CPU initialization fault; 0xD3 / three short beeps = memory initialization fault; 0xE2 / two long beeps = graphics initialization fault; 0xB4 / four short beeps = boot-storage detection fault. These are invented model-specific training codes, not universal POST codes.",
+    "objective": "5.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-001",
@@ -430,7 +461,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "USB-C describes a connector, not a guarantee of every protocol. A port can carry charging and USB data without supporting DisplayPort Alternate Mode. The other listed specifications do not establish the required video capability."
+    "explanation": "USB-C describes a connector, not a guarantee of every protocol. A port can carry charging and USB data without supporting DisplayPort Alternate Mode. The other listed specifications do not establish the required video capability.",
+    "objective": "1.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-002",
@@ -461,7 +498,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "Two compatible 8 GiB SO-DIMMs provide 16 GiB and satisfy the stated matched-channel requirement. A single 16 GiB module meets capacity but not the requested two-channel arrangement. DDR5 and desktop DIMMs are not substitutes for DDR4 SO-DIMMs."
+    "explanation": "Two compatible 8 GiB SO-DIMMs provide 16 GiB and satisfy the stated matched-channel requirement. A single 16 GiB module meets capacity but not the requested two-channel arrangement. DDR5 and desktop DIMMs are not substitutes for DDR4 SO-DIMMs.",
+    "objective": "1.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-003",
@@ -497,7 +540,13 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "A swollen battery requires the device to be taken out of use and handled under the manufacturer’s service and disposal procedures. Pressure, puncturing, and continued charging can worsen the hazard. Battery recalibration does not reverse physical swelling."
+    "explanation": "A swollen battery requires the device to be taken out of use and handled under the manufacturer’s service and disposal procedures. Pressure, puncturing, and continued charging can worsen the hazard. Battery recalibration does not reverse physical swelling.",
+    "objective": "1.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-004",
@@ -528,7 +577,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "Direct Bluetooth pairing requires the peripheral to advertise itself in pairing mode and the tablet to select the correct device. A replacement has its own identity; the old saved pairing does not automatically authorize it. Wi-Fi profiles and IP addresses do not establish Bluetooth pairing."
+    "explanation": "Direct Bluetooth pairing requires the peripheral to advertise itself in pairing mode and the tablet to select the correct device. A replacement has its own identity; the old saved pairing does not automatically authorize it. Wi-Fi profiles and IP addresses do not establish Bluetooth pairing.",
+    "objective": "1.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-005",
@@ -559,7 +614,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "MDM centrally provisions profiles and applications and enforces management policies on enrolled devices. The extent of remote removal depends on enrollment and platform. File synchronization, DHCP, and remote desktop services do not provide the requested device-enrollment and policy controls."
+    "explanation": "MDM centrally provisions profiles and applications and enforces management policies on enrolled devices. The extent of remote removal depends on enrollment and platform. File synchronization, DHCP, and remote desktop services do not provide the requested device-enrollment and policy controls.",
+    "objective": "1.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-006",
@@ -590,34 +651,40 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "USB tethering shares the phone’s cellular connection with a connected computer. USB file-transfer mode only exposes supported data-transfer functions. Wi-Fi Direct and a VPN do not automatically provide the explicitly requested USB internet-sharing connection."
+    "explanation": "USB tethering shares the phone’s cellular connection with a connected computer. USB file-transfer mode only exposes supported data-transfer functions. Wi-Fi Direct and a VPN do not automatically provide the explicitly requested USB internet-sharing connection.",
+    "objective": "1.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-007",
     "kind": "multiple",
-    "domain": 1,
-    "title": "Prepare a display replacement",
-    "prompt": "A technician must replace a damaged laptop display assembly. Select TWO sources or checks that best establish a compatible replacement before ordering.",
+    "domain": 2,
+    "title": "Keep the branch services available",
+    "prompt": "A branch uses two healthy web servers behind one service address. It also needs switch and firewall events collected centrally for investigation. Select TWO server/appliance roles that directly satisfy these requirements.",
     "options": [
       {
         "id": "a",
-        "text": "Match only the diagonal size and assume mounting and signaling are identical"
+        "text": "DNS resolver and a longer DNS cache lifetime"
       },
       {
         "id": "b",
-        "text": "Verify panel/assembly dimensions, resolution support, and connector requirements"
+        "text": "Load balancer distributing requests across the web servers"
       },
       {
         "id": "c",
-        "text": "Match only the connector’s pin count and ignore the model’s approved panels"
+        "text": "DHCP relay forwarding client lease requests"
       },
       {
         "id": "d",
-        "text": "Choose a higher-resolution panel without verifying system or cable support"
+        "text": "Network time service storing the full event messages"
       },
       {
         "id": "e",
-        "text": "Consult the exact laptop model’s service documentation and approved part list"
+        "text": "Syslog collector receiving device event messages"
       }
     ],
     "select_count": 2,
@@ -626,7 +693,13 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "Laptop displays differ in mounting, connectors, signaling, touch support, and electrical requirements. Use the exact service documentation and compatible assembly specifications. Matching only diagonal size or connector pin count does not establish compatibility, and higher resolution is not automatically supported."
+    "explanation": "A load balancer distributes service requests; a syslog collector gathers event messages. DNS resolves names, DHCP supplies client network configuration, and NTP synchronizes clocks rather than storing the logs. Time synchronization is useful for correlating events but does not replace collection.",
+    "objective": "2.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-008",
@@ -657,7 +730,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "NFC supports the very short-range interaction described between a compatible phone and tag. Bluetooth, infrared, and Wi-Fi Direct involve different interfaces and connection behavior; none is implied merely by placing the phone close to this NFC tag."
+    "explanation": "NFC supports the very short-range interaction described between a compatible phone and tag. Bluetooth, infrared, and Wi-Fi Direct involve different interfaces and connection behavior; none is implied merely by placing the phone close to this NFC tag.",
+    "objective": "1.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-009",
@@ -688,7 +767,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "The timing and successful personal mail isolate the issue toward the corporate account’s authentication state. Reauthentication is the focused first check. Radio hardware changes are not justified while other network services work."
+    "explanation": "The timing and successful personal mail isolate the issue toward the corporate account’s authentication state. Reauthentication is the focused first check. Radio hardware changes are not justified while other network services work.",
+    "objective": "1.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-010",
@@ -724,30 +809,36 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "Internal cellular access requires supported WWAN hardware, suitable antennas, and carrier provisioning. An empty M.2 socket or existing Wi-Fi module does not guarantee WWAN compatibility. Buying a SIM alone cannot add a cellular radio to the laptop."
+    "explanation": "Internal cellular access requires supported WWAN hardware, suitable antennas, and carrier provisioning. An empty M.2 socket or existing Wi-Fi module does not guarantee WWAN compatibility. Buying a SIM alone cannot add a cellular radio to the laptop.",
+    "objective": "1.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-011",
     "kind": "single",
-    "domain": 1,
-    "title": "Connect a legacy projector",
-    "prompt": "A presenter has a laptop with HDMI output and a projector with VGA input only. The projector has no audio capability. Which accessory is appropriate?",
+    "domain": 2,
+    "title": "Connect a rural branch",
+    "prompt": "A branch has no usable cable, DSL or fiber service. A local provider can install a directional antenna with line of sight to its nearby terrestrial tower. Which connection type does this proposal describe?",
     "options": [
       {
         "id": "a",
-        "text": "A passive HDMI-to-VGA pin adapter with no conversion electronics"
+        "text": "Satellite broadband through an orbiting relay"
       },
       {
         "id": "b",
-        "text": "An active VGA-source-to-HDMI-display converter that cannot work in reverse"
+        "text": "Fiber service terminated by an ONT"
       },
       {
         "id": "c",
-        "text": "An active HDMI-to-VGA converter compatible with the required resolution"
+        "text": "Fixed wireless internet from a WISP"
       },
       {
         "id": "d",
-        "text": "A passive HDMI-to-DVI-D adapter followed by an analog VGA cable"
+        "text": "A Bluetooth PAN extended through a cellular phone"
       }
     ],
     "select_count": 1,
@@ -755,7 +846,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "HDMI carries digital video and VGA requires analog video, so the signal needs active conversion in the correct direction. A connector shape adapter alone cannot perform digital-to-analog conversion. Converter resolution and power requirements must also be checked."
+    "explanation": "A wireless internet service provider can deliver fixed wireless service from a terrestrial tower to customer equipment. Satellite uses an orbiting relay, fiber needs an optical connection, and a short-range Bluetooth PAN does not describe this provider link.",
+    "objective": "2.7",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-012",
@@ -786,7 +883,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "Online-only placeholders show file metadata without guaranteeing local content. Marking required files for offline availability downloads the content; verify completion and test access before travel. Clearing local copies or signing out does not establish offline access."
+    "explanation": "Online-only placeholders show file metadata without guaranteeing local content. Marking required files for offline availability downloads the content; verify completion and test access before travel. Clearing local copies or signing out does not establish offline access.",
+    "objective": "1.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-013",
@@ -817,7 +920,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "M.2 specifies a form factor and connector family, while NVMe/PCIe and SATA are different interfaces. The stated socket requires a compatible NVMe drive; a similarly sized M.2 SATA drive is not guaranteed to work."
+    "explanation": "M.2 specifies a form factor and connector family, while NVMe/PCIe and SATA are different interfaces. The stated socket requires a compatible NVMe drive; a similarly sized M.2 SATA drive is not guaranteed to work.",
+    "objective": "1.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-014",
@@ -848,7 +957,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "A DHCP reservation binds an available address to a known client identifier, commonly its MAC address. A shorter lease does not guarantee a fixed assignment. A DNS A record only maps a name to an address, and excluding .40 without a reservation does not assign it to a dynamically configured printer."
+    "explanation": "A DHCP reservation binds an available address to a known client identifier, commonly its MAC address. A shorter lease does not guarantee a fixed assignment. A DNS A record only maps a name to an address, and excluding .40 without a reservation does not assign it to a dynamically configured printer.",
+    "objective": "2.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-015",
@@ -879,7 +994,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "HTTPS conventionally uses TCP 443. TCP 80 is ordinary HTTP, TCP 25 is SMTP server-to-server mail, and TCP 3389 is commonly Remote Desktop. Applications may use custom ports, but this scenario specifies the default."
+    "explanation": "HTTPS conventionally uses TCP 443. TCP 80 is ordinary HTTP, TCP 25 is SMTP server-to-server mail, and TCP 3389 is commonly Remote Desktop. Applications may use custom ports, but this scenario specifies the default.",
+    "objective": "2.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-016",
@@ -915,7 +1036,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A separate VLAN/subnet creates a distinct network segment, and routing/firewall policy controls traffic between segments. A VLAN alone does not guarantee isolation if routing permits everything. Different SSIDs or DNS suffixes do not enforce access restrictions when traffic is otherwise bridged or allowed."
+    "explanation": "A separate VLAN/subnet creates a distinct network segment, and routing/firewall policy controls traffic between segments. A VLAN alone does not guarantee isolation if routing permits everything. Different SSIDs or DNS suffixes do not enforce access restrictions when traffic is otherwise bridged or allowed.",
+    "objective": "2.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-017",
@@ -946,7 +1073,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "For conventional 20 MHz 2.4 GHz planning in the stated channel range, 1, 6, and 11 are the standard nonoverlapping choices. Adjacent channel numbers overlap substantially. Actual channel planning still requires a site survey and local regulatory compliance."
+    "explanation": "For conventional 20 MHz 2.4 GHz planning in the stated channel range, 1, 6, and 11 are the standard nonoverlapping choices. Adjacent channel numbers overlap substantially. Actual channel planning still requires a site survey and local regulatory compliance.",
+    "objective": "2.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-018",
@@ -977,7 +1110,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "The source must meet the AP’s specified PoE standard and available wattage. A compliant 802.3at source addresses power negotiation and supply. Passive injectors are not interchangeable merely because they use Ethernet connectors."
+    "explanation": "The source must meet the AP’s specified PoE standard and available wattage. A compliant 802.3at source addresses power negotiation and supply. Passive injectors are not interchangeable merely because they use Ethernet connectors.",
+    "objective": "2.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-019",
@@ -1008,7 +1147,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "172.20.15.10 lies inside private 172.16.0.0/12, covering 172.16 through 172.31. The 169.254 range is link-local, not RFC 1918. The 198.51.100 range is reserved for documentation, and 172.32 is outside that private block."
+    "explanation": "172.20.15.10 lies inside private 172.16.0.0/12, covering 172.16 through 172.31. The 169.254 range is link-local, not RFC 1918. The 198.51.100 range is reserved for documentation, and 172.32 is outside that private block.",
+    "objective": "2.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-020",
@@ -1039,7 +1184,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "Communication between IP subnets requires a router or a device providing Layer 3 routing, with any required access rules. Layer 2 switching alone does not route between them. DNS resolves names; a DHCP relay assists lease traffic but is not a replacement for the required routing function."
+    "explanation": "Communication between IP subnets requires a router or a device providing Layer 3 routing, with any required access rules. Layer 2 switching alone does not route between them. DNS resolves names; a DHCP relay assists lease traffic but is not a replacement for the required routing function.",
+    "objective": "2.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-021",
@@ -1070,7 +1221,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "Fiber avoids electrical interference and can support 300 meters with suitable fiber and transceivers. Shielding or a passive coupler does not extend a standard copper 1000BASE-T channel to 300 meters. Distance, optics, fiber type, and installation requirements must all match."
+    "explanation": "Fiber avoids electrical interference and can support 300 meters with suitable fiber and transceivers. Shielding or a passive coupler does not extend a standard copper 1000BASE-T channel to 300 meters. Distance, optics, fiber type, and installation requirements must all match.",
+    "objective": "2.7",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-022",
@@ -1106,7 +1263,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "A maps a name to an IPv4 address; AAAA maps a name to an IPv6 address. MX identifies mail exchangers, TXT carries text data, and PTR is commonly used for reverse address-to-name lookup."
+    "explanation": "A maps a name to an IPv4 address; AAAA maps a name to an IPv6 address. MX identifies mail exchangers, TXT carries text data, and PTR is commonly used for reverse address-to-name lookup.",
+    "objective": "2.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-023",
@@ -1137,7 +1300,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A wire-map cable tester checks conductor continuity and termination mapping. It is a focused first tool for suspected cable faults. A toner/probe locates cable paths, while Wi-Fi and packet-analysis tools do not directly verify this pin wiring."
+    "explanation": "A wire-map cable tester checks conductor continuity and termination mapping. It is a focused first tool for suspected cable faults. A toner/probe locates cable paths, while Wi-Fi and packet-analysis tools do not directly verify this pin wiring.",
+    "objective": "2.8",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-024",
@@ -1168,30 +1337,36 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A home router routes LAN traffic and commonly uses NAT/PAT so multiple internal devices can share one public IPv4 address. DHCP can supply LAN configuration. A bridge-mode modem alone does not necessarily perform these router functions."
+    "explanation": "A home router routes LAN traffic and commonly uses NAT/PAT so multiple internal devices can share one public IPv4 address. DHCP can supply LAN configuration. A bridge-mode modem alone does not necessarily perform these router functions.",
+    "objective": "2.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-025",
     "kind": "single",
     "domain": 2,
-    "title": "Identify a mail submission port",
-    "prompt": "An email client must submit mail to its provider using authenticated SMTP with STARTTLS on the standard submission port. Which port should the technician configure?",
+    "title": "Restore server-to-server mail delivery",
+    "prompt": "A mail server can receive client messages, but cannot deliver them directly to another organization’s mail exchanger after an outbound firewall change. DNS lookups succeed. Which default destination service should the technician check first?",
     "options": [
       {
         "id": "a",
-        "text": "TCP 587"
+        "text": "SMTP on TCP 25"
       },
       {
         "id": "b",
-        "text": "TCP 143"
+        "text": "IMAP on TCP 143"
       },
       {
         "id": "c",
-        "text": "TCP 110"
+        "text": "POP3 on TCP 110"
       },
       {
         "id": "d",
-        "text": "UDP 161"
+        "text": "SMB on TCP 445"
       }
     ],
     "select_count": 1,
@@ -1199,7 +1374,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "TCP 587 is the standard message submission port and commonly uses STARTTLS. TCP 110 and 143 are associated with retrieving mail via POP3 and IMAP; UDP 161 is commonly SNMP. The question specifies STARTTLS submission, not implicit TLS submission."
+    "explanation": "Direct mail-server delivery normally uses SMTP over TCP 25. IMAP and POP3 retrieve mailbox contents; SMB provides file and related sharing. Authenticated client submission is a different flow; the question explicitly concerns delivery between mail servers.",
+    "objective": "2.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-026",
@@ -1230,30 +1411,36 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "SSH provides encrypted remote shell access and conventionally listens on TCP 22. Telnet does not encrypt its session. TFTP transfers files with minimal features, and ordinary HTTP is not a secure command-line management protocol."
+    "explanation": "SSH provides encrypted remote shell access and conventionally listens on TCP 22. Telnet does not encrypt its session. TFTP transfers files with minimal features, and ordinary HTTP is not a secure command-line management protocol.",
+    "objective": "2.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-027",
     "kind": "single",
     "domain": 2,
-    "title": "Select a faster nearby wireless band",
-    "prompt": "A dual-band client is in the same room as its AP. The 2.4 GHz band is crowded, while a survey shows spare capacity on 5 GHz. What change is most likely to improve its wireless throughput?",
+    "title": "Find the missing 6 GHz network",
+    "prompt": "An AP broadcasts a 6 GHz-only SSID. A laptop with a Wi-Fi 6 adapter lists nearby 2.4 GHz and 5 GHz networks but not this SSID. The adapter specifications list only those two bands. A Wi-Fi 6E test client connects successfully. What best explains the laptop’s behavior?",
     "options": [
       {
         "id": "a",
-        "text": "Widen the crowded 2.4 GHz channel without measuring neighboring use"
+        "text": "A DHCP reservation is missing for the laptop"
       },
       {
         "id": "b",
-        "text": "Increase the DHCP lease period to reduce radio contention"
+        "text": "The laptop must use a wider 2.4 GHz channel"
       },
       {
         "id": "c",
-        "text": "Change only the DNS server while leaving the congested radio connection unchanged"
+        "text": "The AP requires a different DNS record for each band"
       },
       {
         "id": "d",
-        "text": "Connect the client to the supported 5 GHz network"
+        "text": "The installed adapter lacks 6 GHz radio support"
       }
     ],
     "select_count": 1,
@@ -1261,34 +1448,41 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "A supported 5 GHz connection can reduce contention in this explicitly surveyed environment. Distance, obstacles, and client capabilities still matter. Widening an already crowded 2.4 GHz channel may increase interference, while DHCP lease duration and DNS changes do not remove radio congestion."
+    "explanation": "Wi-Fi 6 alone does not imply 6 GHz support; Wi-Fi 6E extends operation into that band. The stated adapter cannot discover the 6 GHz-only WLAN. DHCP and DNS are used after basic wireless connectivity and cannot add a radio band. Channel width on another band does not solve the compatibility mismatch.",
+    "objective": "2.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4",
+      "intel-6ghz"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-028",
     "kind": "multiple",
     "domain": 2,
-    "title": "Connect to a hidden training WLAN",
-    "prompt": "A training WLAN deliberately suppresses its SSID in beacons. Its administrator has supplied the SSID and WPA2-Personal passphrase. Select TWO pieces of configuration needed when manually adding the client profile.",
+    "title": "Approve a 6 GHz upgrade",
+    "prompt": "An office plans a 6 GHz WLAN and asks whether existing equipment can use it. Select TWO checks that directly establish end-to-end 6 GHz compatibility before purchase.",
     "options": [
       {
         "id": "a",
-        "text": "Supply the correct network passphrase"
+        "text": "Confirm the AP and client adapters support 6 GHz operation"
       },
       {
         "id": "b",
-        "text": "Configure WPA2-Enterprise with a RADIUS password instead of the supplied personal mode"
+        "text": "Confirm that increasing a 5 GHz radio channel width enables 6 GHz automatically"
       },
       {
         "id": "c",
-        "text": "Enter the AP’s management login password instead of the supplied WLAN passphrase"
+        "text": "Confirm that a Wi-Fi 6 label alone guarantees a 6 GHz-capable radio"
       },
       {
         "id": "d",
-        "text": "Leave the SSID blank so the hidden network can automatically supply its name"
+        "text": "Confirm that replacing the DNS resolver enables unsupported client radios"
       },
       {
         "id": "e",
-        "text": "Enter the exact network SSID and matching security type"
+        "text": "Confirm regional authorization plus supported OS and driver operation for 6 GHz"
       }
     ],
     "select_count": 2,
@@ -1297,7 +1491,14 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "The manually added personal WLAN profile needs the exact SSID, matching security configuration, and supplied passphrase. Enterprise authentication is a different configuration, and an AP management password is a separate credential. Suppressing the SSID does not secure or conceal the WLAN from discovery."
+    "explanation": "Both radio endpoints must support the band, and the operating system, drivers and regulatory setting must allow it. Wi-Fi 6 without 6E is insufficient evidence. DNS and wider channels do not create new radio-band support.",
+    "objective": "2.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4",
+      "intel-6ghz"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-029",
@@ -1328,30 +1529,36 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "The supplied router interface 10.44.6.1 is reachable on the workstation’s local /24 and provides the requested route. .255 is that subnet’s broadcast address, 10.44.7.1 is outside the local subnet, and loopback points to the workstation itself."
+    "explanation": "The supplied router interface 10.44.6.1 is reachable on the workstation’s local /24 and provides the requested route. .255 is that subnet’s broadcast address, 10.44.7.1 is outside the local subnet, and loopback points to the workstation itself.",
+    "objective": "2.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-030",
     "kind": "single",
     "domain": 2,
-    "title": "Replace the office firewall",
-    "prompt": "A replacement firewall must decide whether to allow return traffic by remembering outbound connections. Which capability most directly provides this behavior?",
+    "title": "Publish a mail-handling policy",
+    "prompt": "SPF and DKIM are already configured for a company’s email domain. The administrator now needs to publish a policy that tells receiving servers how to handle messages failing domain alignment and where to send aggregate reports. Which DNS-based mechanism meets that request?",
     "options": [
       {
         "id": "a",
-        "text": "Stateless filtering that evaluates each packet independently with no connection table"
+        "text": "An MX record naming the inbound mail exchanger"
       },
       {
         "id": "b",
-        "text": "Stateful packet inspection"
+        "text": "DMARC policy published in a TXT record"
       },
       {
         "id": "c",
-        "text": "An unmanaged switch’s MAC address forwarding table"
+        "text": "An A record containing the mail server’s IPv4 address"
       },
       {
         "id": "d",
-        "text": "A DNS cache that remembers recently resolved hostnames"
+        "text": "A CNAME alias for the web server"
       }
     ],
     "select_count": 1,
@@ -1359,7 +1566,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A stateful firewall tracks connection state and uses it when evaluating packets, including associated return traffic. An unmanaged switch learns MAC forwarding locations but does not provide the same connection-state firewall policy."
+    "explanation": "DMARC supplies a domain policy and reporting instructions based on aligned SPF/DKIM authentication. An MX record locates inbound mail servers; A resolves an IPv4 address and CNAME creates an alias. Those records do not express the requested handling/reporting policy.",
+    "objective": "2.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-031",
@@ -1390,7 +1603,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "RAID 1 mirrors the two drives, leaving approximately one drive’s capacity usable. RAID 0 stripes for capacity/performance without drive-failure tolerance. A conventional RAID 5 set needs at least three members. No RAID level replaces backups."
+    "explanation": "RAID 1 mirrors the two drives, leaving approximately one drive’s capacity usable. RAID 0 stripes for capacity/performance without drive-failure tolerance. A conventional RAID 5 set needs at least three members. No RAID level replaces backups.",
+    "objective": "3.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-032",
@@ -1426,7 +1645,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "A matching socket alone does not guarantee chipset or firmware support. The processor also needs suitable power delivery and cooling. Core count and advertised clock speed cannot establish electrical, thermal, or firmware compatibility with the motherboard."
+    "explanation": "A matching socket alone does not guarantee chipset or firmware support. The processor also needs suitable power delivery and cooling. Core count and advertised clock speed cannot establish electrical, thermal, or firmware compatibility with the motherboard.",
+    "objective": "3.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-033",
@@ -1457,7 +1682,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "The card must fit the available slot, chassis height, and power limits. A compatible low-profile bracket is necessary in this chassis, but low profile alone does not guarantee electrical support. Link speed does not override slot, power, or clearance requirements."
+    "explanation": "The card must fit the available slot, chassis height, and power limits. A compatible low-profile bracket is necessary in this chassis, but low profile alone does not guarantee electrical support. Link speed does not override slot, power, or clearance requirements.",
+    "objective": "3.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-034",
@@ -1488,30 +1719,36 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "When the active workload exceeds physical memory, paging can become a bottleneck. Additional compatible RAM can hold more of that working set. The other changes do not increase memory capacity for the project."
+    "explanation": "When the active workload exceeds physical memory, paging can become a bottleneck. Additional compatible RAM can hold more of that working set. The other changes do not increase memory capacity for the project.",
+    "objective": "3.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-035",
     "kind": "single",
     "domain": 3,
-    "title": "Choose a display cable",
-    "prompt": "A desktop and monitor both have DisplayPort connectors. The user needs a digital video connection that can also carry audio to the monitor’s speakers. Which cable meets the stated requirement?",
+    "title": "Choose a display for dark-room review",
+    "prompt": "A video editor wants pixels that emit their own light and can turn off individually for deep blacks. Which display technology directly matches this requirement?",
     "options": [
       {
         "id": "a",
-        "text": "A VGA cable with a passive DisplayPort connector adapter but no signal conversion"
+        "text": "A TN LCD with one edge backlight"
       },
       {
         "id": "b",
-        "text": "A DVI-D cable alone with no separate audio connection"
+        "text": "An IPS LCD with one edge backlight"
       },
       {
         "id": "c",
-        "text": "A compatible DisplayPort cable"
+        "text": "OLED"
       },
       {
         "id": "d",
-        "text": "A 3.5 mm audio cable with no video connection"
+        "text": "A Mini-LED-backlit LCD with dimming zones"
       }
     ],
     "select_count": 1,
@@ -1519,30 +1756,36 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "DisplayPort carries digital video and can carry audio when supported by both endpoints. VGA carries analog video without audio. An audio-only cable cannot carry the required video signal."
+    "explanation": "OLED uses self-emissive pixels. TN and IPS are LCD panel technologies that require a backlight. Mini-LED improves LCD backlight control using many zones, but the LCD pixels are not individually self-emissive. Burn-in considerations still matter for static content.",
+    "objective": "3.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-036",
     "kind": "single",
     "domain": 3,
-    "title": "Understand laser printing",
-    "prompt": "A technician studies why a laser printer’s toner becomes permanently bonded to paper. Which assembly performs that step using heat and pressure?",
+    "title": "Complete scheduled laser maintenance",
+    "prompt": "A laser printer has reached its vendor-specified maintenance interval. The kit contains a fuser and feed rollers, and the device has just finished a long print run. What is the best next action?",
     "options": [
       {
         "id": "a",
-        "text": "The transfer roller that moves toner onto the paper"
+        "text": "Reset the maintenance counter without replacing the worn components"
       },
       {
         "id": "b",
-        "text": "The imaging drum that receives the electrostatic image"
+        "text": "Apply solvent to the drum while the printer is running"
       },
       {
         "id": "c",
-        "text": "The pickup roller that starts feeding the page"
+        "text": "Replace the toner cartridge and treat the entire maintenance interval as complete"
       },
       {
         "id": "d",
-        "text": "The fuser assembly"
+        "text": "Follow the model’s shutdown/cooling procedure, install the kit, then perform the specified reset and test"
       }
     ],
     "select_count": 1,
@@ -1550,7 +1793,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "The fuser bonds transferred toner to the paper using heat and pressure. The imaging drum carries the image, the transfer mechanism moves toner to the paper, and pickup rollers feed sheets. Fusers can remain hot and require the vendor’s service precautions."
+    "explanation": "Use the model-specific service procedure: the fuser can be hot, and scheduled components must be installed before the maintenance counter is reset. Toner replacement is not a substitute for a fuser/feed-roller kit. Unapproved solvents and working on a running device are inappropriate.",
+    "objective": "3.8",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-037",
@@ -1581,7 +1830,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "An impact mechanism can transfer pressure through multipart forms. Ordinary laser and inkjet printing do not strike the form to produce those duplicate layers. Direct thermal printers require suitable heat-sensitive media."
+    "explanation": "An impact mechanism can transfer pressure through multipart forms. Ordinary laser and inkjet printing do not strike the form to produce those duplicate layers. Direct thermal printers require suitable heat-sensitive media.",
+    "objective": "3.8",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-038",
@@ -1612,7 +1867,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "Direct thermal printing uses heat-sensitive paper rather than ink, toner, or an impact ribbon. Wrong media or reversed loading can cause blank receipts despite normal paper movement. Follow the model’s roll-loading instructions."
+    "explanation": "Direct thermal printing uses heat-sensitive paper rather than ink, toner, or an impact ribbon. Wrong media or reversed loading can cause blank receipts despite normal paper movement. Follow the model’s roll-loading instructions.",
+    "objective": "3.8",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-039",
@@ -1648,30 +1909,36 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "The PSU must supply adequate power for the whole system and the connectors required by the GPU. Connector adapters do not establish adequate capacity or suitability. Manufacturer requirements and system load should guide selection."
+    "explanation": "The PSU must supply adequate power for the whole system and the connectors required by the GPU. Connector adapters do not establish adequate capacity or suitability. Manufacturer requirements and system load should guide selection.",
+    "objective": "3.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-040",
     "kind": "single",
     "domain": 3,
-    "title": "Use a UPS correctly",
-    "prompt": "An office wants a server to remain powered during brief outages and shut down cleanly during longer ones. Which device best addresses the requirement?",
+    "title": "Move a desktop between mains supplies",
+    "prompt": "A desktop PSU label states 100–240 VAC, 50/60 Hz, automatic input selection. It is moved from a 120 V office to a 230 V office. The local outlet is properly grounded. What should the technician do?",
     "options": [
       {
         "id": "a",
-        "text": "A surge-suppression strip with no battery"
+        "text": "Add an external step-down transformer because all desktop PSUs accept only 120 V"
       },
       {
         "id": "b",
-        "text": "A suitably rated UPS with supported shutdown signaling"
+        "text": "Use a correctly rated local power lead and verify the label covers the new supply"
       },
       {
         "id": "c",
-        "text": "A rack power-distribution unit with no energy storage"
+        "text": "Open the PSU and move its internal wiring to a 230 V tap"
       },
       {
         "id": "d",
-        "text": "A standby generator without a UPS to bridge its startup interval"
+        "text": "Change the motherboard’s 12 V output requirement to 230 V"
       }
     ],
     "select_count": 1,
@@ -1679,7 +1946,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A UPS provides temporary battery power and can coordinate a controlled shutdown when supported and configured. A surge strip may suppress voltage spikes but does not provide backup runtime."
+    "explanation": "The printed automatic 100–240 VAC input range covers both supplies, so a suitable local lead is needed rather than internal modification. Mains input and low-voltage DC output are different. Never open the PSU to alter an automatic input setting.",
+    "objective": "3.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-041",
@@ -1715,7 +1988,13 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "A conventional 2.5-inch internal SATA drive uses a SATA data connection and a separate SATA power connector. Its data cable does not supply the required drive power. PCIe auxiliary power and front-panel USB headers are different interfaces and cannot simply replace those connections."
+    "explanation": "A conventional 2.5-inch internal SATA drive uses a SATA data connection and a separate SATA power connector. Its data cable does not supply the required drive power. PCIe auxiliary power and front-panel USB headers are different interfaces and cannot simply replace those connections.",
+    "objective": "3.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-042",
@@ -1746,7 +2025,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "RAID 10 stripes across mirrored pairs, combining mirroring with striping. RAID 0 provides no mirror, RAID 5 uses distributed parity, and spanning concatenates capacity. RAID 10 fault tolerance depends on which members fail, so it is not a backup strategy."
+    "explanation": "RAID 10 stripes across mirrored pairs, combining mirroring with striping. RAID 0 provides no mirror, RAID 5 uses distributed parity, and spanning concatenates capacity. RAID 10 fault tolerance depends on which members fail, so it is not a backup strategy.",
+    "objective": "3.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-043",
@@ -1777,30 +2062,36 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "Laser printers can adjust feeding and fusing behavior for supported media. The job must match the actual envelope size, media type, supported tray, and vendor restrictions. Tray selection alone is insufficient, and unsupported duplexing can cause feeding problems."
+    "explanation": "Laser printers can adjust feeding and fusing behavior for supported media. The job must match the actual envelope size, media type, supported tray, and vendor restrictions. Tray selection alone is insufficient, and unsupported duplexing can cause feeding problems.",
+    "objective": "3.7",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-044",
     "kind": "single",
     "domain": 3,
-    "title": "Add a high-speed storage controller",
-    "prompt": "A motherboard manual provides a free PCIe x4 slot with the required PCIe generation for a storage controller. Which expansion interface should the technician match?",
+    "title": "Keep an array available after two drive failures",
+    "prompt": "A controller supports RAID 0, 1, 5, 6 and 10. A four-drive array of equal 2 TB disks must tolerate ANY two member failures. Which arrangement meets the requirement, and what is its approximate usable raw capacity?",
     "options": [
       {
         "id": "a",
-        "text": "A conventional PCI slot merely because it is an expansion slot"
+        "text": "RAID 5 with 6 TB usable"
       },
       {
         "id": "b",
-        "text": "PCI Express with compatible lane and physical-slot requirements"
+        "text": "RAID 6 with 4 TB usable"
       },
       {
         "id": "c",
-        "text": "An M.2 storage socket without a supported adapter or electrical arrangement"
+        "text": "RAID 10 with 4 TB usable and guaranteed survival of any two failures"
       },
       {
         "id": "d",
-        "text": "A SATA motherboard data port used directly as an expansion-card slot"
+        "text": "RAID 0 with 8 TB usable"
       }
     ],
     "select_count": 1,
@@ -1808,7 +2099,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "The controller must fit and operate on a suitable PCIe slot, including electrical lane support and motherboard restrictions. Conventional PCI, SATA data ports, and M.2 sockets are different interfaces or form factors; a card cannot be inserted directly into them just because they also connect peripherals."
+    "explanation": "RAID 6 reserves the equivalent of two drives for dual distributed parity, so four 2 TB members provide about 4 TB before formatting and tolerate any two member failures. RAID 5 tolerates one. RAID 10 can survive some two-drive failures, but not loss of both members of the same mirror. RAID 0 has no redundancy. RAID does not replace backups.",
+    "objective": "3.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-045",
@@ -1839,7 +2136,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "Efficiency compares useful DC output with AC input under specified test conditions; remaining input energy is primarily lost as heat. It is separate from maximum output capacity and does not mean identical efficiency at all loads. An ordinary PSU does not provide battery runtime."
+    "explanation": "Efficiency compares useful DC output with AC input under specified test conditions; remaining input energy is primarily lost as heat. It is separate from maximum output capacity and does not mean identical efficiency at all loads. An ordinary PSU does not provide battery runtime.",
+    "objective": "3.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-046",
@@ -1875,7 +2178,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "ESD precautions, disconnected power, proper alignment, and the correct mounting position protect the module and socket. Forcing keyed connectors or leaving the module unsupported can damage it. Internal M.2 modules are not generically hot-swappable."
+    "explanation": "ESD precautions, disconnected power, proper alignment, and the correct mounting position protect the module and socket. Forcing keyed connectors or leaving the module unsupported can damage it. Internal M.2 modules are not generically hot-swappable.",
+    "objective": "3.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-047",
@@ -1906,30 +2215,36 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "ECC memory can detect and correct supported classes of memory errors when the complete platform supports it. The DIMM must also match the platform’s supported type, such as registered or unbuffered memory. A server chassis or heatsink does not add ECC to ordinary non-ECC RAM."
+    "explanation": "ECC memory can detect and correct supported classes of memory errors when the complete platform supports it. The DIMM must also match the platform’s supported type, such as registered or unbuffered memory. A server chassis or heatsink does not add ECC to ordinary non-ECC RAM.",
+    "objective": "3.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-048",
     "kind": "single",
     "domain": 3,
-    "title": "Share an office printer directly",
-    "prompt": "An Ethernet-capable printer must remain reachable when every employee PC is shut down. Which arrangement best meets the requirement?",
+    "title": "Protect documents at a shared printer",
+    "prompt": "HR staff send sensitive documents to a hallway multifunction printer. Jobs must remain held until the sender is physically at the device. Which feature best satisfies this requirement?",
     "options": [
       {
         "id": "a",
-        "text": "Share its USB connection through an employee PC that is shut down overnight"
+        "text": "Enable a default landscape orientation"
       },
       {
         "id": "b",
-        "text": "Connect the printer to the network and configure a stable address and appropriate print access"
+        "text": "Require a PIN or badge to release each held print job"
       },
       {
         "id": "c",
-        "text": "Use a USB-only connection to an employee laptop that is often off site"
+        "text": "Increase the print resolution for all users"
       },
       {
         "id": "d",
-        "text": "Connect the printer to a switch but configure no usable network address or print service"
+        "text": "Create a desktop shortcut to the printer’s IP address"
       }
     ],
     "select_count": 1,
@@ -1937,7 +2252,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A network-attached printer can accept jobs independently of an employee workstation. A printer shared through a PC generally depends on that PC being available. Addressing, permissions, and drivers still need to be configured appropriately."
+    "explanation": "Secure print holds a job until the user authenticates or supplies its release credential at the device. Higher resolution, orientation and connection shortcuts do not prevent another person collecting an unattended printout. Device permissions and retention settings should also follow the organization’s policy.",
+    "objective": "3.7",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-049",
@@ -1968,7 +2289,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "DDR generations differ in keying and electrical requirements and are not interchangeable. A supported DDR4 UDIMM is needed for the stated board. Capacity alone does not establish compatibility."
+    "explanation": "DDR generations differ in keying and electrical requirements and are not interchangeable. A supported DDR4 UDIMM is needed for the stated board. Capacity alone does not establish compatibility.",
+    "objective": "3.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-050",
@@ -1999,7 +2326,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "Twisted-pair Ethernet patch cables commonly use 8P8C modular plugs referred to as RJ45. RJ11 is commonly telephone wiring, LC is fiber, and F-type is coaxial. The cable and termination must also meet the intended Ethernet category and wiring standard."
+    "explanation": "Twisted-pair Ethernet patch cables commonly use 8P8C modular plugs referred to as RJ45. RJ11 is commonly telephone wiring, LC is fiber, and F-type is coaxial. The cable and termination must also meet the intended Ethernet category and wiring standard.",
+    "objective": "3.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-051",
@@ -2030,7 +2363,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "Appropriate thermal interface material fills microscopic gaps and improves heat transfer. Use the cooler manufacturer’s specified application and quantity. Excessive material, an unsuitable pad thickness, or no material can impair contact or heat transfer; the material is not intended to space the cooler away from the CPU."
+    "explanation": "Appropriate thermal interface material fills microscopic gaps and improves heat transfer. Use the cooler manufacturer’s specified application and quantity. Excessive material, an unsuitable pad thickness, or no material can impair contact or heat transfer; the material is not intended to space the cooler away from the CPU.",
+    "objective": "3.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-052",
@@ -2061,7 +2400,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "IaaS supplies infrastructure such as virtual compute, network, and storage while the customer typically manages guest operating systems and applications. SaaS delivers an application with much more of the stack managed by the provider."
+    "explanation": "IaaS supplies infrastructure such as virtual compute, network, and storage while the customer typically manages guest operating systems and applications. SaaS delivers an application with much more of the stack managed by the provider.",
+    "objective": "4.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-053",
@@ -2092,7 +2437,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "SaaS supplies the application as a service, reducing the customer’s server and application-platform maintenance. The organization still has responsibilities such as account administration, appropriate sharing, and data governance."
+    "explanation": "SaaS supplies the application as a service, reducing the customer’s server and application-platform maintenance. The organization still has responsibilities such as account administration, appropriate sharing, and data governance.",
+    "objective": "4.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-054",
@@ -2123,7 +2474,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "A Type 1 hypervisor runs directly on the host hardware. A Type 2 hypervisor runs on a host operating system. Remote access software is not itself evidence of a local virtualization platform."
+    "explanation": "A Type 1 hypervisor runs directly on the host hardware. A Type 2 hypervisor runs on a host operating system. Remote access software is not itself evidence of a local virtualization platform.",
+    "objective": "4.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-055",
@@ -2159,7 +2516,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "The hypervisor must be supported by the hardware and firmware configuration, and the host needs memory and storage for itself and its guests. A 64-bit OS alone does not prove all hypervisor requirements are met. Overcommit policies do not create unlimited physical resources."
+    "explanation": "The hypervisor must be supported by the hardware and firmware configuration, and the host needs memory and storage for itself and its guests. A 64-bit OS alone does not prove all hypervisor requirements are met. Overcommit policies do not create unlimited physical resources.",
+    "objective": "4.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-056",
@@ -2190,7 +2553,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "An internal/private switch can connect only the specified guests when no host interface or uplink exists. Terminology varies by hypervisor, so the stated connectivity is decisive. Bridged, NAT, and host-only arrangements provide additional paths excluded by this requirement."
+    "explanation": "An internal/private switch can connect only the specified guests when no host interface or uplink exists. Terminology varies by hypervisor, so the stated connectivity is decisive. Bridged, NAT, and host-only arrangements provide additional paths excluded by this requirement.",
+    "objective": "4.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-057",
@@ -2221,34 +2590,40 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "Elasticity is the ability to expand and contract resources with demand. The scenario explicitly describes both directions. Scaling policies, limits, and costs still need management; elasticity does not imply infinite free capacity."
+    "explanation": "Elasticity is the ability to expand and contract resources with demand. The scenario explicitly describes both directions. Scaling policies, limits, and costs still need management; elasticity does not imply infinite free capacity.",
+    "objective": "4.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-058",
     "kind": "multiple",
     "domain": 4,
-    "title": "Use a pre-change VM checkpoint",
-    "prompt": "A technician is testing an update on a disposable lab VM and wants a convenient rollback point. Select TWO accurate statements about a typical VM snapshot/checkpoint.",
+    "title": "Compare application containers with full VMs",
+    "prompt": "A team packages Linux services using standard process-isolated Linux containers rather than hardware-isolated containers. Select TWO accurate comparisons with full virtual machines.",
     "options": [
       {
         "id": "a",
-        "text": "It guarantees recovery when both its base disk and the host datastore are destroyed"
+        "text": "Each standard container must boot its own independent guest kernel"
       },
       {
         "id": "b",
-        "text": "It can provide a short-term rollback point supported by the hypervisor"
+        "text": "The containers share the Linux host kernel while isolating application processes"
       },
       {
         "id": "c",
-        "text": "It is always a complete independent copy requiring no base disk"
+        "text": "Containers can always run an incompatible operating-system kernel without a VM"
       },
       {
         "id": "d",
-        "text": "It consumes no additional datastore space as the guest changes"
+        "text": "Container isolation makes host security updates unnecessary"
       },
       {
         "id": "e",
-        "text": "It should not be treated as an independent backup of the host storage"
+        "text": "Full VMs normally include separate guest operating systems and kernels"
       }
     ],
     "select_count": 2,
@@ -2257,30 +2632,37 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "Snapshots/checkpoints can simplify lab rollback but often depend on the base virtual disk and underlying datastore. They consume resources and may affect performance. An independent backup addresses different failure scenarios."
+    "explanation": "Standard process-isolated containers share a host kernel; full VMs run separate guest kernels on virtualized hardware. A container does not by itself provide an arbitrary incompatible kernel, and host patching remains necessary. Hardware-isolated container modes are specifically excluded by the scenario.",
+    "objective": "4.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4",
+      "microsoft-containers"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-059",
     "kind": "single",
     "domain": 4,
-    "title": "Deploy a private cloud",
-    "prompt": "A company operates pooled, self-service compute resources for only its own organization in its own data center. Which cloud deployment model is the closest fit?",
+    "title": "Select a managed application platform",
+    "prompt": "A team wants to deploy its own web application code while the provider maintains the guest OS, runtime and underlying servers. The team still controls its application and data. Which service model is the closest match?",
     "options": [
       {
         "id": "a",
-        "text": "A simple external USB backup disk"
+        "text": "IaaS with customer-managed guest operating systems"
       },
       {
         "id": "b",
-        "text": "Private cloud"
+        "text": "PaaS"
       },
       {
         "id": "c",
-        "text": "Public cloud available to unrelated tenants"
+        "text": "SaaS providing a finished vendor application"
       },
       {
         "id": "d",
-        "text": "Community cloud shared by several separate organizations"
+        "text": "A locally installed type 2 hypervisor"
       }
     ],
     "select_count": 1,
@@ -2288,30 +2670,36 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A private cloud is dedicated to one organization and may be operated on or off premises. The stated pooled self-service operation matters: merely owning a server would not by itself establish cloud characteristics."
+    "explanation": "PaaS provides a managed runtime/platform for customer applications. IaaS leaves guest OS administration to the customer, while SaaS supplies an already managed end-user application. A local hypervisor is not the requested cloud service model.",
+    "objective": "4.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-060",
     "kind": "single",
     "domain": 4,
-    "title": "Read the cloud usage bill",
-    "prompt": "A team is charged for VM runtime and stored data according to reported consumption rather than purchasing a fixed physical server. Which cloud characteristic does the metering illustrate?",
+    "title": "Explain a cloud transfer charge",
+    "prompt": "A team uploads 50 GB to a cloud storage service, then external customers download 900 GB from it. The provider’s published tariff charges for internet egress and does not charge for this ingress. Which usage explains the transfer line on the bill?",
     "options": [
       {
         "id": "a",
-        "text": "Rapid elasticity even if resource allocations never change"
+        "text": "The 50 GB upload into the service"
       },
       {
         "id": "b",
-        "text": "Resource pooling without usage measurement"
+        "text": "The number of files regardless of transferred bytes"
       },
       {
         "id": "c",
-        "text": "Broad network access regardless of whether consumption is recorded"
+        "text": "The maximum capacity of the office SSD"
       },
       {
         "id": "d",
-        "text": "Measured service"
+        "text": "The 900 GB transferred out to external customers"
       }
     ],
     "select_count": 1,
@@ -2319,7 +2707,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "Measured service tracks resource consumption for monitoring, reporting, and often billing. It does not remove customer responsibilities or guarantee low costs. Workload usage and pricing determine the bill."
+    "explanation": "Ingress and egress are measured relative to the service: uploads enter it and customer downloads leave it. The stated tariff charges for outgoing bytes. Actual cloud tariffs vary, so the question supplies the applicable billing rule rather than assuming all providers charge alike.",
+    "objective": "4.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-061",
@@ -2350,7 +2744,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "Uniform fading with toner-save disabled and a low-toner report supports replacing the depleted cartridge. The printer’s own affected output reduces the likelihood of a workstation-only driver fault. Feed rollers and page-resolution settings do not replenish toner."
+    "explanation": "Uniform fading with toner-save disabled and a low-toner report supports replacing the depleted cartridge. The printer’s own affected output reduces the likelihood of a workstation-only driver fault. Feed rollers and page-resolution settings do not replenish toner.",
+    "objective": "5.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-062",
@@ -2381,7 +2781,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "Toner that does not bond properly suggests a fusing problem after suitable media and settings have been verified. The fuser applies heat and pressure. Service it only after following the vendor’s shutdown and cooling instructions."
+    "explanation": "Toner that does not bond properly suggests a fusing problem after suitable media and settings have been verified. The fuser applies heat and pressure. Service it only after following the vendor’s shutdown and cooling instructions.",
+    "objective": "5.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-063",
@@ -2417,7 +2823,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "No physical link after a move points first to cabling or port connectivity. Seating and known-good substitutions test that layer. DNS and IP changes cannot repair an unplugged or damaged physical link."
+    "explanation": "No physical link after a move points first to cabling or port connectivity. Seating and known-good substitutions test that layer. DNS and IP changes cannot repair an unplugged or damaged physical link.",
+    "objective": "5.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-064",
@@ -2448,7 +2860,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A 169.254 IPv4 link-local address on a DHCP-configured host commonly indicates that it did not obtain a usable lease. Check the connection, VLAN, DHCP path, and client state. Changing DNS or inventing a link-local gateway does not repair the intended office DHCP assignment."
+    "explanation": "A 169.254 IPv4 link-local address on a DHCP-configured host commonly indicates that it did not obtain a usable lease. Check the connection, VLAN, DHCP path, and client state. Changing DNS or inventing a link-local gateway does not repair the intended office DHCP assignment.",
+    "objective": "5.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-065",
@@ -2479,7 +2897,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "Successful access by IP with failed name resolution directs attention to DNS configuration, lookup results, and local cache/hosts entries. It does not by itself indicate a web-server hardware failure. Compare with a working client."
+    "explanation": "Successful access by IP with failed name resolution directs attention to DNS configuration, lookup results, and local cache/hosts entries. It does not by itself indicate a web-server hardware failure. Compare with a working client.",
+    "objective": "5.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-066",
@@ -2510,7 +2934,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "The observed thermal limit and stationary fan support a cooling fault. Power down before inspecting or servicing the cooling assembly. Disabling protection or increasing voltage can aggravate overheating; reinstalling the application does not restore a failed cooling fan."
+    "explanation": "The observed thermal limit and stationary fan support a cooling fault. Power down before inspecting or servicing the cooling assembly. Disabling protection or increasing voltage can aggravate overheating; reinstalling the application does not restore a failed cooling fan.",
+    "objective": "5.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-067",
@@ -2541,7 +2971,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "A visible but unlit image and working external output point toward internal backlight circuitry or its connection. Exact parts depend on the display design. The operating system and some graphics output are demonstrably functioning."
+    "explanation": "A visible but unlit image and working external output point toward internal backlight circuitry or its connection. Exact parts depend on the display design. The operating system and some graphics output are demonstrably functioning.",
+    "objective": "5.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-068",
@@ -2572,7 +3008,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "The priority is preserving the data while minimizing further stress and writes. The correct recovery approach depends on its value, condition, and organizational process; professional recovery may be appropriate. Destructive testing and formatting can eliminate recovery options."
+    "explanation": "The priority is preserving the data while minimizing further stress and writes. The correct recovery approach depends on its value, condition, and organizational process; professional recovery may be appropriate. Destructive testing and formatting can eliminate recovery options.",
+    "objective": "5.2",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-069",
@@ -2603,7 +3045,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "Two hosts sharing an IPv4 address on one subnet create an address conflict. Each needs a unique valid assignment. Changing only a hostname, gateway, or mask does not establish the two unique host addresses required by this network."
+    "explanation": "Two hosts sharing an IPv4 address on one subnet create an address conflict. Each needs a unique valid assignment. Changing only a hostname, gateway, or mask does not establish the two unique host addresses required by this network.",
+    "objective": "5.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-070",
@@ -2634,30 +3082,36 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "The printer and network path work for another client, so the affected PC’s queue is the focused starting point. Clearing a stuck job and checking the spooler can restore operation. Broad resets and hardware replacement are not supported by the evidence."
+    "explanation": "The printer and network path work for another client, so the affected PC’s queue is the focused starting point. Clearing a stuck job and checking the spooler can restore operation. Broad resets and hardware replacement are not supported by the evidence.",
+    "objective": "5.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-071",
     "kind": "single",
     "domain": 5,
-    "title": "Identify an issue before replacing parts",
-    "prompt": "A user reports that a desktop is sometimes slow. No symptoms have been reproduced and no recent-change history has been gathered. What should the technician do first under a structured troubleshooting process?",
+    "title": "Investigate a clock that resets",
+    "prompt": "A desktop keeps correct time while powered, but its firmware date resets after the AC lead is unplugged overnight. Network time corrects the OS clock after startup. What should be checked first?",
     "options": [
       {
         "id": "a",
-        "text": "Replace the storage drive before collecting usage or symptom information"
+        "text": "Whether the display’s refresh rate matches mains frequency"
       },
       {
         "id": "b",
-        "text": "Implement several performance changes at once before establishing a baseline"
+        "text": "Whether the boot SSD supports NVMe"
       },
       {
         "id": "c",
-        "text": "Assume insufficient RAM without measuring utilization or affected tasks"
+        "text": "Whether the Ethernet link is negotiating full duplex"
       },
       {
         "id": "d",
-        "text": "Ask about the symptoms, timing, recent changes, and affected tasks to identify the problem"
+        "text": "The motherboard’s RTC/CMOS backup battery and vendor replacement procedure"
       }
     ],
     "select_count": 1,
@@ -2665,7 +3119,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "First identify and clarify the problem through user input and observations. Evidence guides a probable-cause theory and controlled tests. Unfocused replacements or simultaneous changes obscure the cause and can create new problems."
+    "explanation": "Loss of firmware time specifically after removal of external power points to the RTC backup supply, commonly a replaceable motherboard battery. Network time only masks the problem after startup. Storage interface, display refresh and Ethernet duplex do not maintain the clock while unpowered.",
+    "objective": "5.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-072",
@@ -2696,7 +3156,13 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "A worn separation mechanism can let multiple sheets feed together. Correct paper and loading have already been checked. The fuser and imaging drum act later in the print process and do not normally separate the initial stack of sheets."
+    "explanation": "A worn separation mechanism can let multiple sheets feed together. Correct paper and loading have already been checked. The fuser and imaging drum act later in the print process and do not normally separate the initial stack of sheets.",
+    "objective": "5.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-073",
@@ -2727,34 +3193,40 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "The controlled substitution changes only the cable while keeping the phone and charger working. That makes the usual cable the leading suspect. Additional testing may locate the exact damage, but replacing unrelated components is not justified."
+    "explanation": "The controlled substitution changes only the cable while keeping the phone and charger working. That makes the usual cable the leading suspect. Additional testing may locate the exact damage, but replacing unrelated components is not justified.",
+    "objective": "5.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-074",
     "kind": "multiple",
-    "domain": 5,
-    "title": "Finish the repair properly",
-    "prompt": "A technician replaced a failed network cable and the workstation now reaches one website. Select TWO appropriate closing steps.",
+    "domain": 2,
+    "title": "Choose transport behavior for two services",
+    "prompt": "A design review compares conventional TCP and UDP behavior. Select TWO accurate statements the technician should use when explaining the trade-offs.",
     "options": [
       {
         "id": "a",
-        "text": "Close the ticket after one unrelated website opens without checking the reported task"
+        "text": "UDP automatically retransmits every lost datagram in order"
       },
       {
         "id": "b",
-        "text": "Record only that the issue is fixed and omit the tested cause and repair"
+        "text": "TCP avoids connection establishment in every exchange"
       },
       {
         "id": "c",
-        "text": "Document the symptoms, cause, repair, and verification results"
+        "text": "TCP provides an ordered byte stream with acknowledgments and retransmission"
       },
       {
         "id": "d",
-        "text": "Apply additional unrequested changes before confirming the successful repair"
+        "text": "UDP guarantees delivery if the application uses port 53"
       },
       {
         "id": "e",
-        "text": "Verify the user’s required connectivity and normal operation, including relevant safeguards"
+        "text": "UDP sends datagrams without transport-layer guarantees of delivery or order"
       }
     ],
     "select_count": 2,
@@ -2763,7 +3235,13 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "Verification should cover the original problem and relevant normal functionality, followed by useful documentation of the work and outcome. One successful website does not necessarily establish that the reported business task is restored."
+    "explanation": "TCP supplies a reliable ordered byte stream using mechanisms including acknowledgments and retransmission. UDP does not guarantee delivery or order; applications may implement their own reliability. A port number selects a service and cannot add those transport guarantees to UDP.",
+    "objective": "2.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-075",
@@ -2794,12 +3272,18 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "The location-specific low signal points to coverage and attenuation. A survey can guide AP placement or additional coverage while considering channels and capacity. DNS settings, DHCP lease time, and a faster internet circuit do not raise the weak radio signal in the room."
+    "explanation": "The location-specific low signal points to coverage and attenuation. A survey can guide AP placement or additional coverage while considering channels and capacity. DNS settings, DHCP lease time, and a faster internet circuit do not raise the weak radio signal in the room.",
+    "objective": "5.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-076",
     "kind": "single",
-    "domain": 5,
+    "domain": 3,
     "title": "Check a boot-device change",
     "prompt": "A PC reports “no boot device” immediately after a technician adds a blank second SSD. Firmware detects both the original boot SSD and the new SSD. What should be checked first?",
     "options": [
@@ -2825,7 +3309,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "Both drives are detected and the symptom follows adding a blank drive, so boot order or the selected boot entry is a focused first check. Reformatting the existing system is destructive and unsupported by the evidence."
+    "explanation": "Both drives are detected and the symptom follows adding a blank drive, so boot order or the selected boot entry is a focused first check. Reformatting the existing system is destructive and unsupported by the evidence.",
+    "objective": "3.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-077",
@@ -2861,7 +3351,13 @@
       "e"
     ],
     "weight": 6,
-    "explanation": "The recent RAM change and pre-boot failure point to module compatibility, placement, and seating. Returning to a known-good configuration helps isolate the change. An OS reinstall cannot remedy a failure before POST completes."
+    "explanation": "The recent RAM change and pre-boot failure point to module compatibility, placement, and seating. Returning to a known-good configuration helps isolate the change. An OS reinstall cannot remedy a failure before POST completes.",
+    "objective": "5.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-078",
@@ -2892,7 +3388,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "The correlation with upload saturation and otherwise healthy LAN/DNS points to WAN congestion, which can increase latency and packet loss. Scheduling or shaping backup traffic may help once the bottleneck is confirmed."
+    "explanation": "The correlation with upload saturation and otherwise healthy LAN/DNS points to WAN congestion, which can increase latency and packet loss. Scheduling or shaping backup traffic may help once the bottleneck is confirmed.",
+    "objective": "5.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-079",
@@ -2923,7 +3425,13 @@
       "a"
     ],
     "weight": 6,
-    "explanation": "POST and diagnostic codes are vendor- and model-dependent. The exact service reference prevents replacing the wrong component. A code meaning from an unrelated motherboard cannot safely be assumed to apply."
+    "explanation": "POST and diagnostic codes are vendor- and model-dependent. The exact service reference prevents replacing the wrong component. A code meaning from an unrelated motherboard cannot safely be assumed to apply.",
+    "objective": "5.1",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-080",
@@ -2954,7 +3462,13 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "The gradual dimming and lamp-hour warning support service of the light source. The model’s instructions determine whether it is user replaceable and how to cool and handle it. Raising input resolution or changing network settings does not reverse lamp aging."
+    "explanation": "The gradual dimming and lamp-hour warning support service of the light source. The model’s instructions determine whether it is user replaceable and how to cool and handle it. Raising input resolution or changing network settings does not reverse lamp aging.",
+    "objective": "5.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-081",
@@ -2985,7 +3499,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "The controlled cable substitution implicates the replacement cable or termination. 1000BASE-T uses all four pairs, so certain faults may allow a lower-speed link while preventing gigabit operation. A cable test can locate the defect."
+    "explanation": "The controlled cable substitution implicates the replacement cable or termination. 1000BASE-T uses all four pairs, so certain faults may allow a lower-speed link while preventing gigabit operation. A cable test can locate the defect.",
+    "objective": "5.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-082",
@@ -3016,30 +3536,36 @@
       "c"
     ],
     "weight": 6,
-    "explanation": "Localized lost touch after physical damage, while the image and external input work, implicates the touch-sensing assembly. On some devices it is serviced as a complete display assembly. Network services do not explain that localized failure."
+    "explanation": "Localized lost touch after physical damage, while the image and external input work, implicates the touch-sensing assembly. On some devices it is serviced as a complete display assembly. Network services do not explain that localized failure.",
+    "objective": "5.4",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-083",
     "kind": "single",
     "domain": 5,
-    "title": "Test a proposed fix methodically",
-    "prompt": "A technician suspects a faulty patch cable is causing errors. Which test best isolates that theory?",
+    "title": "Diagnose a flapping switch port",
+    "prompt": "A switch log shows one access port repeatedly changing between link-up and link-down. The PC stays powered and other ports are stable. Replacing its patch lead stops the transitions without changing IP settings. Which cause is best supported?",
     "options": [
       {
         "id": "a",
-        "text": "Replace several network components and reinstall the OS before retesting"
+        "text": "A DNS alias that expires every minute"
       },
       {
         "id": "b",
-        "text": "Change the default gateway without testing the suspected cable"
+        "text": "A DHCP lease that is too long"
       },
       {
         "id": "c",
-        "text": "Declare the cable faulty based only on its jacket color"
+        "text": "An incorrect web proxy hostname"
       },
       {
         "id": "d",
-        "text": "Replace only that cable with a known-good equivalent and retest the same connection"
+        "text": "An intermittent physical connection in the replaced lead or its termination"
       }
     ],
     "select_count": 1,
@@ -3047,7 +3573,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "A controlled substitution changes one suspected variable and repeats the observed test. Changing many components simultaneously may restore service but loses evidence about the actual cause and adds unnecessary risk and cost."
+    "explanation": "Link-state transitions and a successful controlled cable replacement support an intermittent physical connection, often called port flapping. DNS, DHCP lease duration and proxy settings act above the physical link and do not normally make a copper port alternate between link-up and link-down.",
+    "objective": "5.5",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-084",
@@ -3078,7 +3610,13 @@
       "d"
     ],
     "weight": 6,
-    "explanation": "A built-in nozzle check isolates the symptom from the computer’s document and color settings. Missing cyan nozzles with an installed, supplied cartridge support a manufacturer-approved cleaning cycle, followed by inspection and further service if necessary."
+    "explanation": "A built-in nozzle check isolates the symptom from the computer’s document and color settings. Missing cyan nozzles with an installed, supplied cartridge support a manufacturer-approved cleaning cycle, followed by inspection and further service if necessary.",
+    "objective": "5.6",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   },
   {
     "id": "q-085",
@@ -3109,6 +3647,12 @@
       "b"
     ],
     "weight": 6,
-    "explanation": "Movement sensitivity and the controlled cable substitution provide strong evidence for a cable or connector problem. Replace the demonstrated suspect cable with a suitable equivalent. A driver reinstall, monitor replacement, or permanent quality reduction is not supported by the stable known-good test."
+    "explanation": "Movement sensitivity and the controlled cable substitution provide strong evidence for a cable or connector problem. Replace the demonstrated suspect cable with a suitable equivalent. A driver reinstall, monitor replacement, or permanent quality reduction is not supported by the stable known-good test.",
+    "objective": "5.3",
+    "exam_code": "220-1201",
+    "sources": [
+      "comptia-1201-v4"
+    ],
+    "reviewed_on": "2026-09-26"
   }
 ]

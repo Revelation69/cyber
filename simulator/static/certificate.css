@@ -1,0 +1,37 @@
+* { box-sizing: border-box; }
+body { margin: 0; padding: 28px; color: #17213a; background: #f0f2f8; font-family: system-ui, sans-serif; }
+.tools { max-width: 1040px; margin: 0 auto 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.tools a { color: #4f46c7; }
+.tools p { width: 100%; margin: 0; font-size: 13px; color: #56617a; }
+button { border: 0; background: #5145cd; color: white; padding: 12px 20px; border-radius: 8px; font: inherit; cursor: pointer; }
+.certificate { max-width: 1040px; margin: auto; padding: 36px 52px 28px; background: white; border: 2px solid #b5a478; outline: 8px solid white; text-align: center; }
+header { display: flex; justify-content: space-between; gap: 16px; font-size: 11px; letter-spacing: 2px; }
+.brand { font-weight: 800; }
+.mock-label { color: #6b6475; }
+.medallion { width: 54px; height: 54px; margin: 24px auto 18px; display: grid; place-items: center; border: 2px solid #b5a478; border-radius: 50%; color: #5145cd; font-size: 30px; }
+.eyebrow { font-size: 10px; letter-spacing: 2px; color: #646b82; }
+h1 { margin: 10px 0 20px; font-family: Georgia, serif; font-size: 40px; font-weight: 400; }
+.presented, .achievement { color: #646b82; font-size: 14px; }
+.candidate { margin: 12px auto 20px; max-width: 850px; font-size: clamp(24px, 3.5vw, 38px); line-height: 1.25; font-weight: 600; color: #443b9c; overflow-wrap: anywhere; unicode-bidi: plaintext; }
+h3 { margin: 10px 0 28px; font-size: 19px; font-weight: 600; }
+h3 span { white-space: nowrap; }
+.details { border-block: 1px solid #e8e3d4; display: flex; justify-content: center; gap: 55px; padding: 18px 0; }
+.details div { display: grid; gap: 7px; }
+.details span { font-size: 9px; letter-spacing: 1.5px; color: #646b82; }
+.details strong { font-size: 15px; }
+footer { margin-top: 24px; color: #666d7e; font-size: 10px; line-height: 1.6; }
+footer strong { color: #41495c; font-size: 10px; letter-spacing: .8px; }
+.reference { font-size: 9px; overflow-wrap: anywhere; }
+@media (max-width: 650px) { body { padding: 18px; } .certificate { padding: 24px 18px; } h1 { font-size: 30px; } .details { gap: 18px; flex-wrap: wrap; } header { font-size: 9px; letter-spacing: 1px; } }
+@page { size: A4 landscape; margin: 12mm; }
+@media print {
+  body { padding: 0; background: white; }
+  .tools { display: none; }
+  .certificate { width: 100%; max-width: none; padding: 8mm 13mm 6mm; outline: none; break-inside: avoid; }
+  .medallion { margin: 5mm auto 3mm; }
+  h1 { font-size: 30pt; margin: 3mm 0 4mm; }
+  .candidate { font-size: 25pt; margin: 3mm auto 4mm; }
+  h3 { margin-bottom: 5mm; }
+  .details { padding: 4mm 0; }
+  footer { margin-top: 4mm; }
+}

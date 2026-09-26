@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mock exam certificate · Core 1 Lab</title>
+  <link rel="stylesheet" href="/static/certificate.css">
+  <script src="/static/certificate.js" defer></script>
+</head>
+<body>
+  <nav class="tools" aria-label="Certificate actions">
+    <a href="/">Back to exam results</a>
+    <button id="print-certificate" type="button">Print / Save as PDF</button>
+    <p>Choose “Save as PDF” in your print dialog. This is a practice award only.</p>
+  </nav>
+  <main class="certificate">
+    <header><span class="brand">CORE 1 LAB</span><span class="mock-label">INDEPENDENT PRACTICE</span></header>
+    <div class="medallion" aria-hidden="true">✓</div>
+    <p class="eyebrow">A MILESTONE IN YOUR PREPARATION</p>
+    <h1>Mock Exam Certificate</h1>
+    <p class="presented">Presented to</p>
+    <h2 class="candidate" dir="auto">{{ certificate.candidate_name }}</h2>
+    <p class="achievement">for passing the Core 1 Lab practice assessment aligned to</p>
+    <h3>CompTIA A+ Core 1 <span>({{ certificate.exam_code }})</span></h3>
+    <div class="details">
+      <div><span>PRACTICE SCORE</span><strong>{{ certificate.score }} / 900</strong></div>
+      <div><span>PASS THRESHOLD</span><strong>675 / 900</strong></div>
+      <div><span>ISSUED · UTC</span><strong>{{ issued }}</strong></div>
+    </div>
+    <footer>
+      <p><strong>MOCK CERTIFICATE — NOT AN OFFICIAL COMPTIA CERTIFICATION</strong></p>
+      <p>Issued by Core 1 Lab for an unproctored practice attempt. Identity is self-declared.
+      Not issued, verified or endorsed by CompTIA. Does not certify exam readiness or confer a professional qualification.</p>
+      <p class="reference">Reference: {{ certificate.id }} · Bank: {{ certificate.bank_version }}</p>
+    </footer>
+  </main>
+</body>
+</html>

@@ -3,7 +3,7 @@
 **Live simulator: [Open Core 1 Lab](http://35.178.246.210)** · [Deployment record](infra/deployment.md)
 
 - [Academy capstone](Project_01.md): the existing infrastructure and security project brief.
-- [Core 1 simulator](simulator/README.md): a complete legacy 220-1101 practice app with 90 questions and five interactive labs.
+- [Core 1 simulator](simulator/README.md): a 220-1201 practice app with 90 questions and five interactive labs.
 - [AWS deployment](infra/README.md): infrastructure, GitHub Actions, operations, rollback and costs.
 
 ## Run the simulator locally
@@ -17,7 +17,7 @@ python3 -m venv .venv
 
 Open http://localhost:8080. Or use `HTTP_PORT=8080 docker compose up --build -d` from the simulator directory.
 
-The simulator is independent practice material, not an official CompTIA exam or score predictor. It intentionally uses the legacy 220-1101 blueprint. The original source prompt, review and revised specification are in [simulator/docs](simulator/docs).
+The simulator is independent practice material, not an official CompTIA exam or score predictor. It uses the 220-1201 objectives (document version 4.0), requires a candidate name and issues printable mock certificates for passing attempts. The original source prompt, review and revised specification are in [simulator/docs](simulator/docs).
 
 ## Pipeline
 

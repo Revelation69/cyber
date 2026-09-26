@@ -1,0 +1,59 @@
+{
+  "exam_code": "220-1201",
+  "bank_version": "1201-2026.09-v1",
+  "objectives_version": "4.0",
+  "reviewed_on": "2026-09-26",
+  "objectives": {
+    "1.1": "Mobile hardware service",
+    "1.2": "Mobile accessories and connections",
+    "1.3": "Mobile network and application support",
+    "2.1": "Transport protocols and service ports",
+    "2.2": "Wireless technologies",
+    "2.3": "Network host services",
+    "2.4": "Network configuration concepts",
+    "2.5": "Networking hardware",
+    "2.6": "SOHO network configuration",
+    "2.7": "Internet connections and network types",
+    "2.8": "Network tools",
+    "3.1": "Display technologies and attributes",
+    "3.2": "Cables and connectors",
+    "3.3": "RAM characteristics",
+    "3.4": "Storage and RAID",
+    "3.5": "Motherboards, CPUs and expansion",
+    "3.6": "Power supplies",
+    "3.7": "Printer deployment and configuration",
+    "3.8": "Printer maintenance",
+    "4.1": "Virtualization",
+    "4.2": "Cloud models and characteristics",
+    "5.1": "Motherboard, memory, CPU and power diagnosis",
+    "5.2": "Storage and RAID diagnosis",
+    "5.3": "Video and display diagnosis",
+    "5.4": "Mobile device diagnosis",
+    "5.5": "Network diagnosis",
+    "5.6": "Printer diagnosis"
+  },
+  "sources": [
+    {
+      "id": "comptia-1201-v4",
+      "title": "CompTIA A+ 220-1201 V15 objectives, document version 4.0",
+      "url": "https://lecbyo.files.cmp.optimizely.com/download/34be017cb73211ef8985a6f347fbf652",
+      "retrieved": "2026-09-26",
+      "sha256": "9fb3471b397a863b1baa33912dffb6fa232b4631e2219f39188c5c109814648c"
+    },
+    {
+      "id": "intel-6ghz",
+      "title": "Intel: Wi-Fi 6 versus Wi-Fi 6E/7 band support",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000099711/wireless.html"
+    },
+    {
+      "id": "microsoft-containers",
+      "title": "Microsoft: Containers versus virtual machines",
+      "url": "https://learn.microsoft.com/en-us/virtualization/windowscontainers/about/containers-vs-vm"
+    },
+    {
+      "id": "apple-esim",
+      "title": "Apple: Set up eSIM",
+      "url": "https://support.apple.com/en-bh/118669"
+    }
+  ]
+}

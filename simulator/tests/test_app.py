@@ -35,7 +35,7 @@ class ExamTests(unittest.TestCase):
         self.temp.cleanup()
 
     def start(self):
-        response = self.client.post("/api/exam", json={})
+        response = self.client.post("/api/exam", json={"candidate_name": "Alex Morgan"})
         self.assertEqual(response.status_code, 201)
         return response.get_json()
 
@@ -75,7 +75,7 @@ class ExamTests(unittest.TestCase):
 
     def test_public_schema_contains_no_answer_key_or_pilot_identities(self):
         self.assertEqual(self.client.get("/api/exam").status_code, 404)
-        response = self.client.post("/api/exam", json={})
+        response = self.client.post("/api/exam", json={"candidate_name": "Alex Morgan"})
         public = response.get_json()
         for question in public["questions"]:
             self.assertFalse({"answer", "expected", "weight", "explanation", "pilot"} & set(question))
@@ -290,7 +290,7 @@ class ExamTests(unittest.TestCase):
             self.assertEqual(self.client.post(path, json={}, headers={"Origin": "https://attacker.example"}).status_code, 403)
             self.assertEqual(self.client.post(path, json={}, headers={"Origin": "null"}).status_code, 403)
             self.assertEqual(self.client.post(path, json={}, headers={"Sec-Fetch-Site": "cross-site"}).status_code, 403)
-        self.assertEqual(self.client.post("/api/exam", json={}, headers={"Origin": "http://localhost"}).status_code, 201)
+        self.assertEqual(self.client.post("/api/exam", json={"candidate_name": "Alex Morgan"}, headers={"Origin": "http://localhost"}).status_code, 201)
         for payload in ([], None, "value", 1):
             response = self.client.post("/api/exam", data=json.dumps(payload), content_type="application/json")
             self.assertEqual(response.status_code, 400)
@@ -350,10 +350,10 @@ class ExamTests(unittest.TestCase):
     def test_metadata_and_health(self):
         self.assertEqual(self.client.get("/healthz").get_json()["status"], "ok")
         metadata = self.client.get("/api/meta").get_json()
-        self.assertEqual(metadata["exam_code"], "220-1101")
+        self.assertEqual(metadata["exam_code"], "220-1201")
         self.assertEqual(metadata["duration_seconds"], DURATION)
         self.assertEqual(metadata["domains"], DOMAINS)
-        self.assertIn("retired", metadata["disclaimer"])
+        self.assertIn("not an official", metadata["disclaimer"])
 
 
 if __name__ == "__main__":

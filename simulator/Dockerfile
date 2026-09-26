@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r requirements.lock \
 COPY app.py ./
 COPY data ./data
 COPY static ./static
+COPY templates ./templates
 
 USER simulator
 EXPOSE 8080

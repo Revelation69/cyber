@@ -1,8 +1,8 @@
-# Core 1 Lab — legacy 220-1101 practice
+# Core 1 Lab — 220-1201 practice
 
 A standalone, timed CompTIA A+ Core 1 practice simulator: 90 original questions, five interactive labs, automatic saves, review flags, a question navigator, partial-credit lab scoring, and a diagnostic report. This directory is independent of the other projects in this repository and can be copied or deployed on its own.
 
-**This is legacy 220-1101 practice.** It does not represent the current exam blueprint or CompTIA's confidential scoring model. It is not affiliated with or endorsed by CompTIA. Review the [prompt assessment](docs/prompt-review.md), [revised build prompt](docs/comptia_core1_simulator_prompt.revised.md), and [curriculum notes](docs/curriculum.md).
+**This is original 220-1201 practice, aligned to the current English objectives document version 4.0.** It does not reproduce CompTIA's confidential questions or scoring model. It is not affiliated with or endorsed by CompTIA. Review the [prompt assessment](docs/prompt-review.md), [revised build prompt](docs/comptia_core1_simulator_prompt.revised.md), and [curriculum notes](docs/curriculum.md).
 
 ## Run locally
 
@@ -33,7 +33,7 @@ To stop it, run `docker compose down`. The named database volume is retained. Do
 
 ## How the exam works
 
-Start a new attempt, work through questions in any order, and flag items to revisit. Configuration labs save editable fields; the RAID lab saves each simulated command. The navigator distinguishes completed, unanswered and flagged items. Use the submission confirmation to check incomplete work before ending early.
+Enter the name to display on your mock certificate before starting. A display name is acceptable; it is saved with the attempt. Names support Unicode, are limited to 80 characters, and cannot be changed after starting. Work through questions in any order, and flag items to revisit. Configuration labs save editable fields; the RAID lab saves each simulated command. The navigator distinguishes completed, unanswered and flagged items. Use the submission confirmation to check incomplete work before ending early.
 
 The browser's HttpOnly cookie identifies its attempt. Reloading or restarting the server preserves the attempt and its original deadline. Closing the browser does not pause time. An expired exam is finalized on the next request, using the deadline as its submission time; the open page requests finalization when its countdown ends. Only answers accepted before the deadline count. A completed report remains available in the same browser; clearing cookies removes that browser's access to it. A new attempt replaces the browser's current attempt, not its predecessor's stored record.
 
@@ -41,13 +41,19 @@ The fixed bank contains 70 single-answer, 15 multiple-response and five performa
 
 | Domain | Blueprint target | Questions |
 | --- | ---: | ---: |
-| Mobile Devices | 15% | 14 |
-| Networking | 20% | 18 |
+| Mobile Devices | 13% | 12 |
+| Networking | 23% | 21 |
 | Hardware | 25% | 22 |
 | Virtualization and Cloud Computing | 11% | 10 |
-| Hardware and Network Troubleshooting | 29% | 26 |
+| Hardware and Network Troubleshooting | 28% | 25 |
 
-The router, RAID, enterprise Wi-Fi, VM allocation and POST labs each belong to one primary reporting domain. Counts include those labs and round the historical percentages to whole questions. Lab-specific technical assumptions are supplied inside each exercise.
+The SOHO addressing, RAID, mobile support, VM allocation and POST labs each belong to one primary reporting domain. Counts include those labs and round the 220-1201 percentages to whole questions. Lab-specific technical assumptions are supplied inside each exercise.
+
+## Mock certificates and existing attempts
+
+Passing named 220-1201 attempts unlock **View / print mock certificate** in the results. Open it and use **Print / Save as PDF**. The server uses the immutable result to supply the candidate name, score, UTC issue date, exam code and reference ID. Active, failed, anonymous and legacy attempts cannot obtain a certificate. It is explicitly an unproctored mock award, not an official CompTIA certificate, certification or identity verification. Save it before starting a new attempt, which replaces access to the previous report in that browser.
+
+Existing 220-1101 sessions keep their original question snapshots, labels and domain weights. They are not silently converted or awarded 220-1201 certificates. Starting a new attempt switches to the new bank.
 
 ## Scoring
 
@@ -193,7 +199,7 @@ The Dockerfile uses Gunicorn, two workers and four threads per worker. The conta
 | `SIMULATOR_PUBLIC_ORIGIN` | empty | Optional canonical origin, e.g. `https://practice.example.com`; required if proxying HTTPS to HTTP |
 | `HOST` / `PORT` | `127.0.0.1` / `8080` | Local `python app.py` listener only |
 
-For HTTPS behind a reverse proxy or load balancer, set the canonical HTTPS origin and secure cookie flag together, and restrict direct HTTP access to the proxy. No AWS credentials, real Wi-Fi passwords or other secrets are required by the simulator. The app has no user-registration system or account recovery, and browser cookies act as attempt credentials. It stores no names or email addresses.
+For HTTPS behind a reverse proxy or load balancer, set the canonical HTTPS origin and secure cookie flag together, and restrict direct HTTP access to the proxy. No AWS credentials, real Wi-Fi passwords or other secrets are required by the simulator. The app has no user-registration system or account recovery, and browser cookies act as attempt credentials. It now stores the candidate display name with each attempt, but no email addresses. Names are not publicly listed; the browser session controls access. The initial public-IP site uses HTTP, so prefer a display name until HTTPS is configured.
 
 After transferring updated source, rebuild:
 

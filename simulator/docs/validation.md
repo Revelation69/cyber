@@ -1,4 +1,15 @@
-# Build validation
+# 220-1201 upgrade validation — 26 September 2026
+
+- 23 behavioral tests passed: required/normalized Unicode names, immutable identity, passing-only certificates, anonymous-session denial, escaping, stable certificates, expired passes and preserved legacy labels/domain weights.
+- All 90 items validate against the new blueprint: counts 12/21/22/10/25, all 27 numbered objectives and valid key/rubric/source references. Twenty items received substantive revisions; all were reviewed and mapped. This checks consistency, not statistical difficulty equivalence.
+- The production Docker image built with the private blueprint and certificate templates. Real HTTP checks passed for saves, flags, timer, RAID, immutable submission and a separate 900-point named attempt receiving private certificate HTML.
+- Browser checks confirmed mandatory name entry, candidate display, revised lab fields, the passing-certificate link and the named certificate with explicit mock/non-CompTIA wording. The certificate has dedicated A4 landscape print CSS and a Print / Save as PDF action.
+- Certificate and name controls were visually inspected. No browser warning/error logs occurred. The new-attempt confirmation explains replacement of access to the previous report/certificate.
+- Existing snapshots require no schema rewrite. New attempts snapshot their code, bank version, name and weights. Legacy sessions remain legacy and cannot receive 220-1201 certificates.
+
+GitHub Actions reruns these checks and the certificate HTTP scenario before deployment. A human curriculum panel, large-sample difficulty calibration and load testing have not been performed.
+
+## Historical validation of the initial 220-1101 build
 
 Verified locally and on AWS on 26 September 2026. See the [deployment record](../../infra/deployment.md) for the live infrastructure and pipeline evidence.
 

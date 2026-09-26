@@ -2419,3 +2419,19 @@ dialog p {
     white-space: nowrap;
   }
 }
+
+/* Candidate identity and clearly separated practice certificates. */
+.candidate-entry { margin: 20px 0; max-width: 440px; }
+.candidate-entry label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.candidate-entry input { width: 100%; min-height: 44px; padding: 11px 13px; border: 1px solid #b7b1ce; border-radius: 8px; background: white; color: #24213c; font: inherit; }
+.candidate-entry input:focus { outline: 3px solid #c7c0f5; outline-offset: 2px; }
+.candidate-entry p { font-size: 12px; line-height: 1.5; margin-top: 8px; color: #5d5872; }
+.candidate-result { overflow-wrap: anywhere; }
+.certificate-callout { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 28px; margin: 24px 0; }
+.certificate-callout h2 { margin: 8px 0; }
+.certificate-callout p { max-width: 620px; font-size: 14px; line-height: 1.6; color: #625e78; overflow-wrap: anywhere; }
+.certificate-callout a { flex-shrink: 0; text-decoration: none; }
+.legacy-notice { padding: 14px 18px; border: 1px solid #d9bf80; background: #fff9e8; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; }
+.objective-reference, .review-sources { color: #625e78; font-size: 12px; line-height: 1.7; }
+.review-sources a { color: #5145b9; }
+@media (max-width: 760px) { .certificate-callout { align-items: flex-start; flex-direction: column; } .certificate-callout a { white-space: normal; } }

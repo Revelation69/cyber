@@ -1,6 +1,6 @@
 # AWS deployment
 
-Target: account **727646487479**, **eu-west-2**, stack **core1-simulator**. The initial service uses HTTP on an Elastic IP. It contains practice exams, with no login or payment flow. A single host is appropriate for a small learning project; it is not highly available.
+Target: account **727646487479**, **eu-west-2**, stack **core1-simulator**. The initial service uses HTTP on an Elastic IP. It contains practice exams and candidate display names, with no login or payment flow. Names are private to the session; use display names on this initial HTTP deployment. A single host is appropriate for a small learning project; it is not highly available.
 
 See the [deployment record](deployment.md) for the live URL, resource IDs and verified release.
 
@@ -45,7 +45,7 @@ Set repository Actions variables from stack outputs:
 
 The region and account guard are explicit in `.github/workflows/simulator.yml`. Pushes to main and manual workflow runs test the app, build and push an image, then pass its immutable digest to a fixed SSM document. Pull requests only test. The OIDC role can push this repository's images and invoke this host's deployment document; it cannot provision infrastructure or run arbitrary SSM documents. Actions are pinned to commit SHAs.
 
-The workflow checks 17 behavioral tests, JavaScript and shell syntax, reproducible CloudFormation output, cfn-lint, and the real production container over HTTP. Deployment checks the new image in a temporary container before switching the application and verifies public health afterwards.
+The workflow checks 23 behavioral tests, JavaScript and shell syntax, reproducible CloudFormation output, cfn-lint, and the real production container over HTTP, including a complete passing attempt and server-issued mock certificate. Deployment checks the new image in a temporary container before switching the application and verifies public health afterwards.
 
 ## Persistence, backups and rollback
 

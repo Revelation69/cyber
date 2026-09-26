@@ -38,6 +38,7 @@ jobs:
         run: |
           python -m unittest discover -s simulator/tests -v
           node --check simulator/static/app.js
+          node --check simulator/static/certificate.js
           bash -n infra/bootstrap.sh infra/deploy.sh scripts/deploy_image.sh
           python scripts/render_template.py
           git diff --exit-code -- infra/cloudformation.json
@@ -53,7 +54,7 @@ jobs:
             if curl --fail --silent http://127.0.0.1:18080/healthz; then break; fi
             sleep 2
           done
-          python simulator/tests/smoke_http.py --base-url http://127.0.0.1:18080
+          python simulator/tests/smoke_http.py --base-url http://127.0.0.1:18080 --verify-certificate
 
   deploy:
     needs: test

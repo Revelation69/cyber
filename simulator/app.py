@@ -1,4 +1,4 @@
-"""Standalone, server-authoritative 220-1101 practice exam.
+"""Standalone, server-authoritative 220-1201 practice exam.
 
 The RAID terminal is a small state machine. No command is executed on the host.
 The question bank and persisted exam snapshots must never be served as static files.
@@ -14,36 +14,53 @@ from pathlib import Path
 import secrets
 import sqlite3
 import time
+import unicodedata
 import uuid
 from collections import Counter
 from contextlib import closing
 from fractions import Fraction
+from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from werkzeug.exceptions import HTTPException
 
 
 ROOT = Path(__file__).resolve().parent
 DURATION = 90 * 60
 COOKIE_NAME = "core1_exam"
-DOMAINS = [
+LEGACY_DOMAINS = [
     {"id": 1, "name": "Mobile Devices", "weight": 15, "count": 14},
     {"id": 2, "name": "Networking", "weight": 20, "count": 18},
     {"id": 3, "name": "Hardware", "weight": 25, "count": 22},
     {"id": 4, "name": "Virtualization and Cloud Computing", "weight": 11, "count": 10},
     {"id": 5, "name": "Hardware and Network Troubleshooting", "weight": 29, "count": 26},
 ]
+DOMAINS = [
+    {"id": 1, "name": "Mobile Devices", "weight": 13, "count": 12},
+    {"id": 2, "name": "Networking", "weight": 23, "count": 21},
+    {"id": 3, "name": "Hardware", "weight": 25, "count": 22},
+    {"id": 4, "name": "Virtualization and Cloud Computing", "weight": 11, "count": 10},
+    {"id": 5, "name": "Hardware and Network Troubleshooting", "weight": 28, "count": 25},
+]
+EXAM_CODE = "220-1201"
+BLUEPRINT = json.loads((ROOT / "data" / "blueprint.json").read_text())
 PUBLIC_FIELDS = {
     "id", "kind", "domain", "title", "prompt", "options", "select_count",
     "lab", "briefing", "fields", "reference",
 }
 RAID_KEYS = ("diagnosed", "identified", "replaced", "rebuilt")
-DISCLAIMER = (
+LEGACY_DISCLAIMER = (
     "Independent legacy CompTIA A+ 220-1101 practice. This retired exam is not the "
     "current certification exam. Original practice questions; not affiliated with "
     "or endorsed by CompTIA. Scores use an illustrative practice formula, not "
     "CompTIA's confidential scoring model."
+)
+DISCLAIMER = (
+    "Independent CompTIA A+ Core 1 (220-1201) practice, mapped to objectives document "
+    "version 4.0. Original questions; not affiliated with or endorsed by CompTIA. "
+    "This practice score and any mock certificate are not an official exam result "
+    "or CompTIA certification."
 )
 
 
@@ -64,6 +81,12 @@ def validate_bank(bank):
         raise ValueError("At least twelve multiple-response questions are required.")
     labs = ("router", "raid", "wifi", "vms", "post")
     for index, q in enumerate(bank):
+        if q.get("exam_code") != EXAM_CODE or q.get("objective") not in BLUEPRINT["objectives"]:
+            raise ValueError(f"Missing or invalid 220-1201 objective: {q.get('id')}")
+        if int(q["objective"].split(".")[0]) != q["domain"]:
+            raise ValueError(f"Objective/domain mismatch: {q['id']}")
+        if not q.get("sources") or not set(q["sources"]) <= {s["id"] for s in BLUEPRINT["sources"]}:
+            raise ValueError(f"Missing or unknown sources: {q['id']}")
         if not all(isinstance(q.get(k), str) and q[k].strip() for k in ("title", "prompt", "explanation")):
             raise ValueError(f"Missing question text: {q.get('id')}")
         if index < 5:
@@ -89,6 +112,17 @@ def validate_bank(bank):
                 raise ValueError(f"Invalid selection count: {q['id']}")
             if (q["kind"] == "single") != (len(answers) == 1):
                 raise ValueError(f"Invalid choice kind: {q['id']}")
+    if {q["objective"] for q in bank} != set(BLUEPRINT["objectives"]):
+        raise ValueError("Every numbered 220-1201 objective needs at least one item.")
+
+
+def normalize_name(value):
+    if not isinstance(value, str) or any(unicodedata.category(c).startswith("C") for c in value):
+        raise InvalidInput("Enter a name using visible characters only.")
+    name = " ".join(unicodedata.normalize("NFC", value).split())
+    if not 1 <= len(name) <= 80 or not any(c.isalpha() for c in name) or any(c in "<>" for c in name):
+        raise InvalidInput("Enter a name of 1–80 characters, including a letter and no angle brackets.")
+    return name
 
 
 def initial_raid():
@@ -189,7 +223,8 @@ def question_credit(question, answers, raid):
 
 
 def grade_exam(exam, submitted_at, reason):
-    domain_points = {d["id"]: [Fraction(0), 0] for d in DOMAINS}
+    domains = exam.get("domains", LEGACY_DOMAINS)
+    domain_points = {d["id"]: [Fraction(0), 0] for d in domains}
     earned = Fraction(0)
     possible = 0
     review = []
@@ -212,10 +247,22 @@ def grade_exam(exam, submitted_at, reason):
             "credit": float(credit), "answer": answer,
             "expected": question["expected"] if is_pbq else question["answer"],
             "explanation": question["explanation"],
+            "objective": question.get("objective"),
+            "sources": question.get("sources", []),
         })
     score = 100 + math.floor(Fraction(800) * earned / possible + Fraction(1, 2))
+    certificate = None
+    if score >= 675 and exam.get("exam_code") == EXAM_CODE and exam.get("candidate_name"):
+        certificate = {
+            "id": "MOCK-1201-" + exam["id"],
+            "candidate_name": exam["candidate_name"], "exam_code": EXAM_CODE,
+            "score": score, "issued_at": submitted_at,
+            "bank_version": exam["bank_version"],
+        }
     return {
         "score": score, "passed": score >= 675,
+        "candidate_name": exam.get("candidate_name", ""),
+        "exam_code": exam.get("exam_code", "220-1101"), "certificate": certificate,
         "earned": round(float(earned), 4), "possible": possible,
         "elapsed_seconds": max(0, min(DURATION, submitted_at - exam["started_at"])),
         "domains": [{
@@ -223,7 +270,7 @@ def grade_exam(exam, submitted_at, reason):
             "percent": round(float(domain_points[d["id"]][0] / domain_points[d["id"]][1]) * 100, 1),
             "earned": round(float(domain_points[d["id"]][0]), 4),
             "possible": domain_points[d["id"]][1],
-        } for d in DOMAINS],
+        } for d in domains],
         "review": review, "submitted_at": submitted_at, "reason": reason,
     }
 
@@ -306,6 +353,11 @@ def apply_patch_to_exam(exam, payload):
 def public_exam(exam, now):
     return {
         "id": exam["id"], "status": exam["status"],
+        "exam_code": exam.get("exam_code", "220-1101"),
+        "bank_version": exam.get("bank_version", "1101-legacy"),
+        "candidate_name": exam.get("candidate_name", ""),
+        "domains": exam.get("domains", LEGACY_DOMAINS),
+        "disclaimer": DISCLAIMER if exam.get("exam_code") == EXAM_CODE else LEGACY_DISCLAIMER,
         "questions": [{k: v for k, v in q.items() if k in PUBLIC_FIELDS} for q in exam["bank"]],
         "answers": exam["answers"], "flags": exam["flags"],
         "current_index": exam["current_index"], "started_at": exam["started_at"],
@@ -316,7 +368,7 @@ def public_exam(exam, now):
 
 
 def create_app(config=None):
-    app = Flask(__name__, static_folder=str(ROOT / "static"))
+    app = Flask(__name__, static_folder=str(ROOT / "static"), template_folder=str(ROOT / "templates"))
     app.config.from_mapping(
         DATABASE=os.environ.get("SIMULATOR_DATABASE", str(ROOT / "instance" / "exams.sqlite3")),
         BANK_PATH=str(ROOT / "data" / "questions.json"),
@@ -421,18 +473,22 @@ def create_app(config=None):
 
     @app.get("/api/meta")
     def meta():
-        return jsonify(exam_code="220-1101", duration_seconds=DURATION, question_count=len(bank), domains=DOMAINS, disclaimer=DISCLAIMER)
+        return jsonify(exam_code=EXAM_CODE, duration_seconds=DURATION, question_count=len(bank),
+                       domains=DOMAINS, disclaimer=DISCLAIMER, blueprint=BLUEPRINT)
 
     @app.post("/api/exam")
     def start_exam():
         payload = json_object()
-        if payload:
-            raise InvalidInput("Starting an exam accepts an empty JSON object only.")
+        if set(payload) != {"candidate_name"}:
+            raise InvalidInput("Enter your candidate_name before beginning the exam.")
+        candidate_name = normalize_name(payload["candidate_name"])
         now = int(app.config["NOW"]())
         token = secrets.token_urlsafe(32)
         key = hashlib.sha256(token.encode()).hexdigest()
         exam = {
             "id": str(uuid.uuid4()), "status": "active", "bank": bank,
+            "exam_code": EXAM_CODE, "bank_version": BLUEPRINT["bank_version"],
+            "candidate_name": candidate_name, "domains": DOMAINS,
             "answers": {}, "flags": [], "current_index": 0,
             "started_at": now, "deadline": now + DURATION,
             "pilots": secrets.SystemRandom().sample([q["id"] for q in bank if q["kind"] != "pbq"], 5),
@@ -455,6 +511,22 @@ def create_app(config=None):
         response = jsonify(public_exam(exam, now))
         response.set_cookie(COOKIE_NAME, token, max_age=30 * 24 * 60 * 60, httponly=True, secure=app.config["COOKIE_SECURE"] or request.is_secure, samesite="Strict", path="/")
         return response, 201
+
+    @app.get("/api/exam/certificate")
+    def certificate():
+        # Only this browser's completed, passing snapshot can issue a certificate.
+        # Names, scores, dates and eligibility cannot be supplied via URL parameters.
+        with closing(connect()) as connection:
+            _, exam = read_exam(connection)
+        if exam is None:
+            return jsonify(error="No saved exam in this browser."), 404
+        report = exam.get("report") or {}
+        cert = report.get("certificate")
+        if (exam["status"] == "active" or not report.get("passed") or not cert
+                or exam.get("exam_code") != EXAM_CODE):
+            return jsonify(error="A named, passing 220-1201 attempt is required for a mock certificate."), 403
+        issued = datetime.fromtimestamp(cert["issued_at"], timezone.utc).strftime("%d %B %Y")
+        return render_template("certificate.html", certificate=cert, issued=issued)
 
     @app.route("/api/exam", methods=["GET", "PATCH"])
     @app.post("/api/exam/command")
