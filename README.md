@@ -1,12 +1,12 @@
 # Cyber learning projects
 
-**Simulator address: [Core 1 Lab](http://35.178.246.210)** · [Deployment record](infra/deployment.md)
+**Live simulator: [Core 1 Lab](http://35.178.246.210)** · [Deployment record](infra/deployment.md)
 
 - [Academy capstone](Project_01.md): the existing infrastructure and security project brief.
 - [Core 1 simulator](simulator/README.md): a 220-1201 practice app with 90 questions and five interactive labs.
 - [AWS deployment](infra/README.md): infrastructure, GitHub Actions, operations, rollback and costs.
 
-The EC2 instance is stopped as of 30 September 2026. Automatic AWS deployment is paused (`AWS_DEPLOY_ENABLED=false`). The complete replacement question bank `1201-2026.09-v2` is ready in this repository; it has not been deployed to the stopped host.
+The existing EC2 instance was restarted on 30 September 2026 and is serving the complete replacement bank **1201-2026.09-v2** from application commit `4401dc0`. [Deployment run 36693084534](https://github.com/Revelation69/cyber/actions/runs/36693084534) passed both testing and AWS deployment. Live HTTP checks passed for saved progress, scoring, RAID commands and named mock certificates. Automatic AWS deployment is enabled (`AWS_DEPLOY_ENABLED=true`).
 
 ## Run the simulator locally
 
@@ -25,4 +25,4 @@ The simulator is independent practice material, not an official CompTIA exam or 
 
 Pull requests run application tests, infrastructure validation and a real container HTTP smoke test. When `AWS_DEPLOY_ENABLED=true`, updates to `main` pass the same checks, then publish an immutable image to ECR and deploy it to the EC2 host through Systems Manager. GitHub uses OIDC and a repository/branch-scoped role; AWS access keys are not stored in GitHub.
 
-After the instance is deliberately restarted and Systems Manager is online, re-enable `AWS_DEPLOY_ENABLED` and dispatch the simulator workflow on `main` to deploy the current form. Restarting the instance alone serves the previously installed image. Start a new exam attempt after deployment to use v2; existing attempts preserve their original form.
+Start a new exam attempt to use v2; existing attempts preserve their original question set and progress. If the instance is stopped again, pause automatic deployment until it is restarted and Systems Manager is online. Restarting an instance alone does not install newer repository changes; a pipeline deployment is still required.
