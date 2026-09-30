@@ -94,12 +94,29 @@ def validate_bank(bank):
                 raise ValueError(f"Invalid PBQ: {q['id']}")
             if not isinstance(q.get("expected"), dict) or not q["expected"]:
                 raise ValueError(f"Missing PBQ rubric: {q['id']}")
+            if q["lab"] == "raid":
+                config = q.get("raid_config", {})
+                members = config.get("members", [])
+                bay = config.get("bay")
+                required = {"level", "failed", "spare", "bay", "disk_type", "members", "other_spares", "degraded_detail"}
+                if (not required <= config.keys() or not members
+                        or len(members) != len(set(members)) or type(bay) is not int
+                        or not 1 <= bay <= len(members)
+                        or members[bay - 1] != config.get("failed")
+                        or config.get("spare") in members):
+                    raise ValueError(f"Invalid RAID inventory: {q['id']}")
             if q["lab"] != "raid":
                 fields = q.get("fields", [])
                 if len({f["id"] for f in fields}) != len(fields):
                     raise ValueError(f"Duplicate PBQ field: {q['id']}")
                 if {f["id"] for f in fields} != set(q["expected"]):
                     raise ValueError(f"PBQ fields must match its rubric: {q['id']}")
+                for field in fields:
+                    expected = q["expected"][field["id"]]
+                    if field["type"] == "select" and expected not in {o["value"] for o in field["options"]}:
+                        raise ValueError(f"PBQ correct selection is unavailable: {q['id']}")
+                    if field["type"] == "number" and not field["min"] <= expected <= field["max"]:
+                        raise ValueError(f"PBQ correct number is outside the input range: {q['id']}")
         else:
             options = q.get("options", [])
             ids = [option["id"] for option in options]
@@ -132,8 +149,19 @@ def initial_raid():
     }
 
 
-def run_raid_command(raid, command):
-    """Interpret an exact allowlist. Never invoke a shell or execute user code."""
+# Old snapshots did not contain controller configuration. Keep their original
+# inventory so an in-progress v1/legacy lab remains solvable after a bank update.
+LEGACY_RAID_CONFIG = {
+    "level": "RAID 5", "failed": "SN-B204", "spare": "SN-E505", "bay": 2,
+    "disk_type": "2 TB SAS", "members": ["SN-A103", "SN-B204", "SN-C305"],
+    "other_spares": [], "degraded_detail": "One disk redundancy lost.",
+}
+
+
+def run_raid_command(raid, command, config=None):
+    """Interpret an exact allowlist against this attempt's frozen inventory."""
+    config = LEGACY_RAID_CONFIG if config is None else config
+    level, failed, spare, bay = (config[k] for k in ("level", "failed", "spare", "bay"))
     normalized = " ".join(command.split()).lower()
     if normalized == "clear":
         raid["history"] = []
@@ -147,36 +175,42 @@ def run_raid_command(raid, command):
     elif normalized == "raid status":
         raid["diagnosed"] = True
         if raid["rebuilt"]:
-            output = "Array: RAID 5 | State: OPTIMAL | Rebuild: 100% | All members healthy."
+            output = f"Array: {level} | State: OPTIMAL | Rebuild: 100% | All members healthy."
         elif raid["replaced"]:
-            output = "Array: RAID 5 | State: DEGRADED | Replacement SN-E505 ready. Rebuild required."
+            output = f"Array: {level} | State: DEGRADED | Replacement {spare} ready. Rebuild required."
         else:
-            output = "Array: RAID 5 | State: DEGRADED | Failed member: SN-B204 (bay 2). One disk redundancy lost."
+            output = f"Array: {level} | State: DEGRADED | Failed member: {failed} (bay {bay}). {config['degraded_detail']}"
     elif normalized == "raid drives":
-        output = (
-            "Bay 1: SN-A103 | 2 TB SAS | ONLINE\n"
-            + ("Bay 2: SN-E505 | 2 TB SAS | ONLINE\n" if raid["rebuilt"] else
-               "Bay 2: SN-E505 | 2 TB SAS | READY FOR REBUILD\n" if raid["replaced"] else
-               "Bay 2: SN-B204 | 2 TB SAS | FAILED\n")
-            + "Bay 3: SN-C305 | 2 TB SAS | ONLINE\n"
-            + ("Spare: none (SN-E505 installed)." if raid["replaced"] else "Spare: SN-E505 | 2 TB SAS | AVAILABLE, compatible.")
-        )
-    elif normalized == "raid identify sn-b204":
+        lines = []
+        for index, serial in enumerate(config["members"], 1):
+            state = "ONLINE"
+            if serial == failed:
+                if raid["replaced"]:
+                    serial = spare
+                    state = "ONLINE" if raid["rebuilt"] else "READY FOR REBUILD"
+                else:
+                    state = "FAILED"
+            lines.append(f"Bay {index}: {serial} | {config['disk_type']} | {state}")
+        lines.append(f"Spare: {spare} installed in bay {bay}." if raid["replaced"] else
+                     f"Spare: {spare} | {config['disk_type']} | AVAILABLE, compatible.")
+        lines.extend(f"Spare: {item['serial']} | {item['description']}" for item in config["other_spares"])
+        output = "\n".join(lines)
+    elif normalized == f"raid identify {failed}".lower():
         if not raid["diagnosed"]:
             output = "Inspect the array with raid status before identifying a disk."
         elif raid["replaced"]:
-            output = "SN-B204 has already been replaced."
+            output = f"{failed} has already been replaced."
         else:
             raid["identified"] = True
-            output = "Identify LED active: bay 2, serial SN-B204. Failed member confirmed."
-    elif normalized == "raid replace sn-b204 sn-e505":
+            output = f"Identify LED active: bay {bay}, serial {failed}. Failed member confirmed."
+    elif normalized == f"raid replace {failed} {spare}".lower():
         if not raid["identified"]:
             output = "Identify the failed member before replacing it."
         elif raid["replaced"]:
-            output = "SN-E505 is already installed in bay 2."
+            output = f"{spare} is already installed in bay {bay}."
         else:
             raid["replaced"] = True
-            output = "SN-B204 removed; compatible replacement SN-E505 installed in bay 2. Ready to rebuild."
+            output = f"{failed} removed; compatible replacement {spare} installed in bay {bay}. Ready to rebuild."
     elif normalized == "raid rebuild":
         if not raid["replaced"]:
             output = "Install the compatible replacement before rebuilding."
@@ -184,9 +218,9 @@ def run_raid_command(raid, command):
             output = "Array already optimal. No rebuild needed."
         else:
             raid["rebuilt"] = True
-            output = "Simulated rebuild: 100%. Array OPTIMAL; RAID 5 redundancy restored."
+            output = f"Simulated rebuild: 100%. Array OPTIMAL; {level} redundancy restored."
     else:
-        output = "Unsupported command or serial. Type help. This simulator accepts only the listed RAID commands."
+        output = "Unsupported command or serial. Type help. Use the failed member and compatible spare shown by raid drives."
     raid["history"].append({"command": command, "output": output})
     raid["history"] = raid["history"][-150:]
 
@@ -555,7 +589,8 @@ def create_app(config=None):
                     command = payload["command"].strip()
                     if not command or len(command) > 200 or any(ord(c) < 32 for c in command):
                         raise InvalidInput("Command must be a single line of 1–200 characters.")
-                    run_raid_command(exam["raid"], command)
+                    raid_question = next(q for q in exam["bank"] if q.get("lab") == "raid")
+                    run_raid_command(exam["raid"], command, raid_question.get("raid_config"))
                 else:
                     apply_patch_to_exam(exam, payload)
             save_exam(connection, key, exam)

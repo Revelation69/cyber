@@ -30,3 +30,10 @@ Repository Actions variables are configured and deployment is enabled. Future ma
 The operator's pre-existing local AWS default profile was used for provisioning; it identifies as the account root. No credentials were copied to the repository or GitHub. Routine deployments use the scoped OIDC role. Use an IAM Identity Center/SSO operator profile for subsequent infrastructure administration.
 
 This is the requested initial public-IP HTTP deployment. Free Tier credits/coverage remain unconfirmed. See the [runbook](README.md) for the approximately $14/month baseline estimate, local backup limits, rollback and cleanup instructions. Current release status and image digests are available in subsequent GitHub Actions run summaries.
+
+
+## 30 September 2026 — question refresh staged, host stopped
+
+The user stopped EC2 instance `i-0dbcc0971f64573d0`; its state was verified as `stopped`. GitHub repository variable `AWS_DEPLOY_ENABLED` is now `false`. The v2 220-1201 bank is a complete 90-item replacement with backward-compatible saved-attempt handling. It is published to the repository for CI validation, with AWS deployment intentionally skipped. No instance start, infrastructure provisioning or production database change was performed for this update.
+
+To serve the new form later, start the existing instance, wait for its Systems Manager agent to be online, set `AWS_DEPLOY_ENABLED=true`, and manually dispatch the simulator workflow on `main`. The existing image will otherwise remain installed. Starting a new attempt after deployment selects v2; resuming a saved attempt retains its original version.

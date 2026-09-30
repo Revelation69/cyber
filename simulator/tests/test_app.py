@@ -73,6 +73,20 @@ class ExamTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_bank(broken)
 
+    def test_bank_rejects_unsolvable_lab_configuration(self):
+        broken = copy.deepcopy(self.bank)
+        broken[1]["raid_config"]["bay"] = 1
+        with self.assertRaises(ValueError):
+            validate_bank(broken)
+        broken = copy.deepcopy(self.bank)
+        broken[2]["expected"]["pairing"] = "unavailable-choice"
+        with self.assertRaises(ValueError):
+            validate_bank(broken)
+        broken = copy.deepcopy(self.bank)
+        broken[3]["expected"]["db_cpu"] = 200
+        with self.assertRaises(ValueError):
+            validate_bank(broken)
+
     def test_public_schema_contains_no_answer_key_or_pilot_identities(self):
         self.assertEqual(self.client.get("/api/exam").status_code, 404)
         response = self.client.post("/api/exam", json={"candidate_name": "Alex Morgan"})
@@ -113,7 +127,7 @@ class ExamTests(unittest.TestCase):
                 continue
             answer = question["expected"] if question["kind"] == "pbq" else question["answer"]
             self.save(question["id"], answer)
-        for command in ("raid status", "raid identify SN-B204", "raid replace SN-B204 SN-E505", "raid rebuild"):
+        for command in ("raid status", "raid identify SN-R402", "raid replace SN-R402 SN-R900", "raid rebuild"):
             self.command(command)
         perfect = self.client.post("/api/exam/submit", json={}).get_json()["report"]
         self.assertEqual((perfect["score"], perfect["earned"], perfect["possible"], perfect["passed"]), (900, 730, 730, True))
@@ -332,12 +346,12 @@ class ExamTests(unittest.TestCase):
 
     def test_raid_sequence_and_no_shell_or_milestone_forgery(self):
         self.start()
-        for command in ("raid rebuild", "raid replace SN-B204 SN-E505", "raid identify SN-B204", "rm -rf /", "raid status; touch /tmp/unsafe", "raid identify SN-A103"):
+        for command in ("raid rebuild", "raid replace SN-R402 SN-R900", "raid identify SN-R402", "rm -rf /", "raid status; touch /tmp/unsafe", "raid identify SN-R303"):
             state = self.command(command)["raid"]
             self.assertFalse(any(state[key] for key in RAID_KEYS))
         self.assertIn("FAILED", self.command("raid drives")["raid"]["history"][-1]["output"])
         self.assertFalse(self.raw_exam()["raid"]["diagnosed"])
-        for index, command in enumerate(("raid status", "raid identify SN-B204", "raid replace SN-B204 SN-E505", "raid rebuild")):
+        for index, command in enumerate(("raid status", "raid identify SN-R402", "raid replace SN-R402 SN-R900", "raid rebuild")):
             state = self.command(command)["raid"]
             self.assertEqual([state[key] for key in RAID_KEYS], [n <= index for n in range(4)])
         self.assertIn("OPTIMAL", self.command("raid status")["raid"]["history"][-1]["output"])
@@ -346,6 +360,61 @@ class ExamTests(unittest.TestCase):
         self.assertTrue(all(state[key] for key in RAID_KEYS))
         for payload in ({"command": "raid status", "rebuilt": True}, {"command": "x" * 201}, {"command": "raid\nstatus"}, {"command": 1}):
             self.assertEqual(self.client.post("/api/exam/command", json=payload).status_code, 400)
+
+    def test_new_raid_rejects_wrong_member_and_undersized_spare(self):
+        public = self.start()
+        self.assertNotIn("raid_config", public["questions"][1])
+        self.command("raid status")
+        inventory = self.command("raid drives")["raid"]["history"][-1]["output"]
+        for evidence in ("SN-R402", "4 TB SATA", "SN-R800", "insufficient capacity"):
+            self.assertIn(evidence, inventory)
+        self.command("raid identify SN-R303")  # Healthy partner cannot be selected.
+        self.assertFalse(self.raw_exam()["raid"]["identified"])
+        self.command("raid identify SN-R402")
+        self.command("raid replace SN-R402 SN-R800")
+        self.assertFalse(self.raw_exam()["raid"]["replaced"])
+        self.command("raid rebuild")
+        self.assertFalse(self.raw_exam()["raid"]["rebuilt"])
+        self.command("raid replace SN-R402 SN-R900")
+        self.command("raid rebuild")
+        output = self.command("raid drives")["raid"]["history"][-1]["output"]
+        self.assertIn("Bay 4: SN-R900 | 4 TB SATA | ONLINE", output)
+        self.assertNotIn("SN-R402", output)
+        self.assertIn("RAID 10", self.command("raid status")["raid"]["history"][-1]["output"])
+
+    def test_raid_console_uses_frozen_attempt_inventory(self):
+        self.start()
+        raid_question = next(q for q in self.app.config["BANK"] if q.get("lab") == "raid")
+        raid_question["raid_config"]["failed"] = "SN-FUTURE"
+        raid_question["title"] = "A future question title"
+        self.assertEqual(self.client.get("/api/exam").get_json()["questions"][1]["title"],
+                         "Restore the archive server mirror pair")
+        self.command("raid status")
+        self.command("raid identify SN-FUTURE")
+        self.assertFalse(self.raw_exam()["raid"]["identified"])
+        self.command("raid identify SN-R402")
+        self.assertTrue(self.raw_exam()["raid"]["identified"])
+
+    def test_pre_refresh_snapshot_retains_original_raid_console(self):
+        self.start()
+        exam = self.raw_exam()
+        exam["bank_version"] = "1201-2026.09-v1"
+        raid_question = next(q for q in exam["bank"] if q.get("lab") == "raid")
+        del raid_question["raid_config"]  # This property did not exist in v1.
+        raid_question["title"] = "Recover a degraded array"
+        token = self.client.get_cookie(COOKIE_NAME).value
+        with sqlite3.connect(self.database) as connection:
+            connection.execute("UPDATE exams SET payload = ? WHERE token_hash = ?",
+                               (json.dumps(exam), hashlib.sha256(token.encode()).hexdigest()))
+        self.assertIn("RAID 5", self.command("raid status")["raid"]["history"][-1]["output"])
+        self.command("raid identify SN-R402")
+        self.assertFalse(self.raw_exam()["raid"]["identified"])
+        for command in ("raid identify SN-B204", "raid replace SN-B204 SN-E505", "raid rebuild"):
+            self.command(command)
+        self.assertTrue(all(self.raw_exam()["raid"][key] for key in RAID_KEYS))
+        state = self.client.get("/api/exam").get_json()
+        self.assertEqual(state["bank_version"], "1201-2026.09-v1")
+        self.assertEqual(state["questions"][1]["title"], "Recover a degraded array")
 
     def test_metadata_and_health(self):
         self.assertEqual(self.client.get("/healthz").get_json()["status"], "ok")

@@ -1,8 +1,8 @@
 {
   "exam_code": "220-1201",
-  "bank_version": "1201-2026.09-v1",
+  "bank_version": "1201-2026.09-v2",
   "objectives_version": "4.0",
-  "reviewed_on": "2026-09-26",
+  "reviewed_on": "2026-09-30",
   "objectives": {
     "1.1": "Mobile hardware service",
     "1.2": "Mobile accessories and connections",
@@ -54,6 +54,30 @@
       "id": "apple-esim",
       "title": "Apple: Set up eSIM",
       "url": "https://support.apple.com/en-bh/118669"
+    },
+    {
+      "id": "corsair-psu-cables",
+      "title": "Corsair: PSU cable compatibility",
+      "url": "https://www.corsair.com/uk/en/explorer/diy-builder/power-supply-units/psu-cable-compatibility/",
+      "retrieved": "2026-09-30"
+    },
+    {
+      "id": "kingston-memory-rate",
+      "title": "Kingston: MT/s versus MHz",
+      "url": "https://www.kingston.com/en/blog/pc-performance/mts-vs-mhz",
+      "retrieved": "2026-09-30"
+    },
+    {
+      "id": "microsoft-virtual-switch",
+      "title": "Microsoft: Hyper-V virtual switch",
+      "url": "https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/virtual-switch",
+      "retrieved": "2026-09-30"
+    },
+    {
+      "id": "nist-cloud",
+      "title": "NIST: Cloud computing characteristics and models",
+      "url": "https://csrc.nist.gov/Projects/Cloud-Computing",
+      "retrieved": "2026-09-30"
     }
   ]
 }

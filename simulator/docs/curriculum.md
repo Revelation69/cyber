@@ -1,19 +1,12 @@
-# 220-1201 curriculum audit
+# 220-1201 curriculum audit — complete replacement form
 
-Reviewed 26 September 2026 against CompTIA A+ 220-1201 V15, English objectives **document version 4.0**, obtained from the official CompTIA Partner Resources objectives collection. Older 2.0 links now redirect to the library; the retrieved English asset is 4.0. The source PDF is not redistributed here.
+Reviewed 30 September 2026 against the official CompTIA A+ Core 1 **220-1201 V15 objectives, document version 4.0**. The official PDF was rechecked from the CompTIA Partner Resources asset. The bank is **1201-2026.09-v2**.
 
-## Primary sources and traceability
+All 90 items replace the previous form: 70 single-answer questions, 15 multiple-response questions and five interactive PBQs. Every title and prompt is new, and all 85 sets of answer choices and explanations have been rewritten. Topics recur where the objectives require them, but this is a new authored form, not a reordered copy. Choices have varied answer positions. Item IDs identify positions within a version; saved attempts retain their own full versioned snapshot.
 
-- [CompTIA A+ 220-1201 V15 objectives, document version 4.0](https://lecbyo.files.cmp.optimizely.com/download/34be017cb73211ef8985a6f347fbf652)
-- [Intel: Wi-Fi 6 versus Wi-Fi 6E/7 band support](https://www.intel.com/content/www/us/en/support/articles/000099711/wireless.html)
-- [Microsoft: Containers versus virtual machines](https://learn.microsoft.com/en-us/virtualization/windowscontainers/about/containers-vs-vm)
-- [Apple: Set up eSIM](https://support.apple.com/en-bh/118669)
+## Blueprint and source review
 
-Official PDF SHA-256: `9fb3471b397a863b1baa33912dffb6fa232b4631e2219f39188c5c109814648c`. Bank version: `1201-2026.09-v1`. Source IDs and objective references are stored on each item; references appear after submission. The official objectives establish scope, not the answers to these original questions. Vendor documentation supports the more specific radio, container and eSIM distinctions.
-
-## Blueprint
-
-| Domain | Official weight | Items in this 90-item form |
+| Domain | Official weight | Items |
 | --- | ---: | ---: |
 | Mobile Devices | 13% | 12 |
 | Networking | 23% | 21 |
@@ -21,109 +14,128 @@ Official PDF SHA-256: `9fb3471b397a863b1baa33912dffb6fa232b4631e2219f39188c5c109
 | Virtualization and Cloud Computing | 11% | 10 |
 | Hardware and Network Troubleshooting | 28% | 25 |
 
-Whole-item rounding totals 90. All **27 numbered objectives** have coverage. This does not mean every bullet/example is tested by one form. The official exam has a maximum of 90 questions in 90 minutes and a 675 passing score on its 100–900 scale. The fixed five labs, hidden five pilots, points and linear practice scoring are simulator design choices; CompTIA does not publish those exact operational details.
+Whole-item rounding totals 90. All **27 numbered objectives** are represented; one form does not test every subtopic. The 90-minute duration and 675 passing threshold on a 100–900 scale follow the published exam details. The five PBQs, five unscored practice items and linear scoring formula are simulator design choices, not claims about CompTIA's undisclosed scoring or any real exam form.
 
-## Editorial review
+The official objectives establish content scope, not answer keys. The questions are original and do not use recalled or leaked exam items. Primary vendor documentation additionally supports memory transfer-rate terminology, modular PSU cable compatibility and virtual network behavior; NIST supports cloud models and characteristics.
 
-Reviewed every stem, option set, key and rationale for a defensible best answer, stated assumptions and correct primary objective. Retained sound fundamentals rather than changing facts merely to rename the exam. Scenario distractors reflect a different layer, incompatible component, wrong service or an action not supported by the evidence. Multiple-response items state the number of answers. PBQs award field/milestone partial credit; the fictional RAID commands are supplied, not vendor syntax candidates must memorize.
+- [CompTIA A+ 220-1201 V15 objectives, document version 4.0](https://lecbyo.files.cmp.optimizely.com/download/34be017cb73211ef8985a6f347fbf652)
+- [Corsair: PSU cable compatibility](https://www.corsair.com/uk/en/explorer/diy-builder/power-supply-units/psu-cable-compatibility/)
+- [Kingston: MT/s versus MHz](https://www.kingston.com/en/blog/pc-performance/mts-vs-mhz)
+- [Microsoft: Hyper-V virtual switch](https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/virtual-switch)
+- [Cisco: Ethernet negotiation and duplex mismatch](https://www.cisco.com/c/en/us/support/docs/lan-switching/ethernet/10561-3.html)
+- [NIST: Cloud computing characteristics and models](https://csrc.nist.gov/Projects/Cloud-Computing)
 
-Changed the SOHO lab to IPv4, gateway, DNS and DHCP reservations. Replaced the deep PEAP/MSCHAPv2/RADIUS lab with mobile eSIM, MDM, tethering, offline files and data-cap management. Mapped RAID repair to troubleshooting 5.2 and firmware boot selection to 3.5. Replaced generic methodology-recall questions: CompTIA explicitly excludes methodology memorization while continuing to test diagnostic scenarios. Removed the unsupported idea that suppressing an SSID is an appropriate security-learning goal.
+The original objectives PDF fingerprint is recorded in `data/blueprint.json`. Older vendor source IDs remain available so previously saved reviews retain their links.
 
-Added or strengthened 6 GHz compatibility and regulatory/OS limits, TCP/UDP, SMTP mail-server delivery, network host roles, DMARC, WISP, OLED, printer maintenance/secure release, PSU input, RAID 6, containers, PaaS, cloud egress, RTC diagnosis and port flapping. Core 2-specific AI/security administration is not imported merely because it is new in the overall A+ series.
+## Editorial checks
 
-This is original practice content, not leaked, copied or recalled exam questions. It has not undergone a CompTIA endorsement, external subject-matter-expert panel or statistical difficulty calibration. It cannot guarantee the same difficulty or predict passing the real exam. A larger rotating bank and learner-response analysis would be needed to reduce repeat-question recall and calibrate difficulty.
+Each item was reviewed for a defensible key, plausible alternatives, explicit multiple-response selection counts, sufficient evidence, objective alignment and a teaching explanation. Scenarios distinguish symptoms from causes, avoid unsupported universal firmware codes, and supply fictional controller syntax rather than requiring vendor command memorization. The review corrected unrelated distractors and strengthened the service-model comparison.
+
+New PBQs:
+
+- Configure a DHCP pool and client options while excluding static infrastructure.
+- Recover a degraded RAID 10 mirror pair, preserving its healthy partner and rejecting an undersized spare.
+- Correct five independent mobile discovery, location, calendar, data and upload settings.
+- Convert workload profiles into VM CPU/RAM allocations and appropriate datastore placement.
+- Diagnose a verified CPU-fan failure using a supplied model-specific POST legend.
+
+The RAID console now uses each attempt's frozen inventory. Older attempts without that configuration continue to use their original RAID 5 inventory and commands. New bank validation rejects an inconsistent failed-member/bay mapping or an unavailable PBQ answer.
+
+This is independently authored practice, not CompTIA-endorsed material. Editorial and functional review do not establish psychometric equivalence to the real exam. No external SME panel or learner-response difficulty calibration has been performed.
 
 ## Item-to-objective map
 
-| Item | Objective | Topic | Review |
-| --- | --- | --- | --- |
-| pbq-1 | 2.6 | Restore the branch workstation network | Revised |
-| pbq-2 | 5.2 | Recover a degraded array | Revised |
-| pbq-3 | 1.3 | Prepare a managed field tablet | Revised |
-| pbq-4 | 4.1 | Allocate the lab hypervisor | Retained; checked |
-| pbq-5 | 5.1 | Interpret a POST service ticket | Retained; checked |
-| q-001 | 1.2 | A dock that will not drive a monitor | Retained; checked |
-| q-002 | 1.1 | Restore laptop memory capacity | Retained; checked |
-| q-003 | 1.1 | Replace a laptop battery safely | Retained; checked |
-| q-004 | 1.3 | Pair the inventory scanner | Retained; checked |
-| q-005 | 1.3 | Enable the mobile workforce | Retained; checked |
-| q-006 | 1.2 | Use a phone as a network connection | Retained; checked |
-| q-007 | 2.3 | Keep the branch services available | Revised |
-| q-008 | 1.2 | Choose contactless data exchange | Retained; checked |
-| q-009 | 1.3 | Restore corporate mail sync | Retained; checked |
-| q-010 | 1.1 | Provide cellular capability | Retained; checked |
-| q-011 | 2.7 | Connect a rural branch | Revised |
-| q-012 | 1.3 | Keep files available offline | Retained; checked |
-| q-013 | 1.1 | Match the replacement drive | Retained; checked |
-| q-014 | 2.4 | Keep the label printer at one address | Retained; checked |
-| q-015 | 2.1 | Inspect secure web connectivity | Retained; checked |
-| q-016 | 2.4 | Segment visitors from payroll | Retained; checked |
-| q-017 | 2.2 | Plan three adjacent access points | Retained; checked |
-| q-018 | 2.5 | Power a ceiling access point | Retained; checked |
-| q-019 | 2.6 | Recognize a private subnet | Retained; checked |
-| q-020 | 2.5 | Join two different networks | Retained; checked |
-| q-021 | 2.7 | Select a fiber uplink | Retained; checked |
-| q-022 | 2.4 | Choose two name-resolution records | Retained; checked |
-| q-023 | 2.8 | Inspect a wiring fault | Retained; checked |
-| q-024 | 2.5 | Separate modem and router roles | Retained; checked |
-| q-025 | 2.1 | Restore server-to-server mail delivery | Revised |
-| q-026 | 2.1 | Provide reliable remote management | Retained; checked |
-| q-027 | 2.2 | Find the missing 6 GHz network | Revised |
-| q-028 | 2.2 | Approve a 6 GHz upgrade | Revised |
-| q-029 | 2.6 | Inspect default-gateway configuration | Retained; checked |
-| q-030 | 2.4 | Publish a mail-handling policy | Revised |
-| q-031 | 3.4 | Size mirrored storage | Retained; checked |
-| q-032 | 3.5 | Match a CPU upgrade | Retained; checked |
-| q-033 | 3.5 | Equip a compact desktop | Retained; checked |
-| q-034 | 3.3 | Identify the working memory requirement | Retained; checked |
-| q-035 | 3.1 | Choose a display for dark-room review | Revised |
-| q-036 | 3.8 | Complete scheduled laser maintenance | Revised |
-| q-037 | 3.8 | Select an impact printer | Retained; checked |
-| q-038 | 3.8 | Prepare a thermal receipt printer | Retained; checked |
-| q-039 | 3.6 | Budget for a GPU upgrade | Retained; checked |
-| q-040 | 3.6 | Move a desktop between mains supplies | Revised |
-| q-041 | 3.2 | Expand SATA storage | Retained; checked |
-| q-042 | 3.4 | Choose a workstation RAID layout | Retained; checked |
-| q-043 | 3.7 | Verify a printer media setting | Retained; checked |
-| q-044 | 3.4 | Keep an array available after two drive failures | Revised |
-| q-045 | 3.6 | Interpret power supply efficiency | Retained; checked |
-| q-046 | 3.4 | Install an M.2 storage module | Retained; checked |
-| q-047 | 3.3 | Use ECC where supported | Retained; checked |
-| q-048 | 3.7 | Protect documents at a shared printer | Revised |
-| q-049 | 3.3 | Match memory generations | Retained; checked |
-| q-050 | 3.2 | Select a connector for a wired endpoint | Retained; checked |
-| q-051 | 3.5 | Select workstation cooling | Retained; checked |
-| q-052 | 4.2 | Choose the cloud service layer | Retained; checked |
-| q-053 | 4.2 | Remove application-server maintenance | Retained; checked |
-| q-054 | 4.1 | Choose a hypervisor type | Retained; checked |
-| q-055 | 4.1 | Prepare local virtual machines | Retained; checked |
-| q-056 | 4.1 | Isolate a training network | Retained; checked |
-| q-057 | 4.2 | Distinguish elasticity from fixed capacity | Retained; checked |
-| q-058 | 4.1 | Compare application containers with full VMs | Revised |
-| q-059 | 4.2 | Select a managed application platform | Revised |
-| q-060 | 4.2 | Explain a cloud transfer charge | Revised |
-| q-061 | 5.6 | Diagnose faint laser output | Retained; checked |
-| q-062 | 5.6 | Toner rubs off the page | Retained; checked |
-| q-063 | 5.5 | Follow the dropped network link | Retained; checked |
-| q-064 | 5.5 | Resolve a self-assigned address | Retained; checked |
-| q-065 | 5.5 | Separate DNS from connectivity | Retained; checked |
-| q-066 | 5.1 | Investigate shutdowns under load | Retained; checked |
-| q-067 | 5.3 | Distinguish display from graphics output | Retained; checked |
-| q-068 | 5.2 | Protect a failing drive’s data | Retained; checked |
-| q-069 | 5.5 | Investigate duplicate addresses | Retained; checked |
-| q-070 | 5.6 | Restore an unresponsive print queue | Retained; checked |
-| q-071 | 5.1 | Investigate a clock that resets | Revised |
-| q-072 | 5.6 | Investigate multiple pages feeding | Retained; checked |
-| q-073 | 5.4 | Restore a phone charging connection | Retained; checked |
-| q-074 | 2.1 | Choose transport behavior for two services | Revised |
-| q-075 | 5.5 | Find weak wireless coverage | Retained; checked |
-| q-076 | 3.5 | Check a boot-device change | Retained; checked |
-| q-077 | 5.1 | Troubleshoot a recent RAM upgrade | Retained; checked |
-| q-078 | 5.5 | Distinguish high latency from name failure | Retained; checked |
-| q-079 | 5.1 | Read a POST code correctly | Retained; checked |
-| q-080 | 5.3 | Check a dim projector | Retained; checked |
-| q-081 | 5.5 | Inspect a cable speed downgrade | Retained; checked |
-| q-082 | 5.4 | Check an unresponsive touchscreen | Retained; checked |
-| q-083 | 5.5 | Diagnose a flapping switch port | Revised |
-| q-084 | 5.6 | Investigate wrong colors on an inkjet | Retained; checked |
-| q-085 | 5.3 | Diagnose an intermittent display cable | Retained; checked |
+Every item below is newly authored for v2.
+
+| Item | Objective | Topic |
+| --- | --- | --- |
+| pbq-1 | 2.6 | Commission a small-office DHCP service |
+| pbq-2 | 5.2 | Restore the archive server mirror pair |
+| pbq-3 | 1.3 | Restore a survey phone profile |
+| pbq-4 | 4.1 | Place three training workloads |
+| pbq-5 | 5.1 | Interpret a cooling interlock |
+| q-001 | 1.1 | Service the keyboard ribbon |
+| q-002 | 1.1 | Protect privacy at a shared desk |
+| q-003 | 1.1 | Reconnect the wireless antennas |
+| q-004 | 1.2 | Capture pressure-sensitive sketches |
+| q-005 | 1.2 | Expand a desk with a port replicator |
+| q-006 | 1.3 | Restore the missing calendar |
+| q-007 | 1.3 | Stop roaming data use |
+| q-008 | 1.2 | Move photographs through a cable |
+| q-009 | 1.3 | Pair a headset with a replacement phone |
+| q-010 | 1.1 | Choose the correct mobile battery |
+| q-011 | 1.3 | Allow location for delivery check-ins |
+| q-012 | 2.1 | Permit a Windows file share |
+| q-013 | 2.1 | Distinguish two mailbox protocols |
+| q-014 | 2.1 | Trace DHCP traffic |
+| q-015 | 2.2 | Reduce channel overlap in a dense office |
+| q-016 | 2.3 | Synchronize log timestamps |
+| q-017 | 2.4 | Publish a mail destination |
+| q-018 | 2.5 | Terminate an incoming fiber service |
+| q-019 | 2.6 | Recognize an automatic link-local address |
+| q-020 | 2.4 | Separate fixed addresses from leases |
+| q-021 | 2.7 | Select a neighborhood network scope |
+| q-022 | 2.8 | Find an unlabeled cable |
+| q-023 | 2.3 | Consolidate perimeter inspection |
+| q-024 | 2.4 | Keep an alias after a server change |
+| q-025 | 2.5 | Add PoE without replacing a switch |
+| q-026 | 2.1 | Identify an interactive remote desktop |
+| q-027 | 2.7 | Match a cable internet handoff |
+| q-028 | 2.8 | Terminate a structured cabling run |
+| q-029 | 2.6 | Read an IPv6 local-link address |
+| q-030 | 2.3 | Centralize network access decisions |
+| q-031 | 2.2 | Track warehouse stock with radio tags |
+| q-032 | 3.1 | Match smooth motion requirements |
+| q-033 | 3.2 | Avoid a transfer-rate bottleneck |
+| q-034 | 3.3 | Decode a DDR module rating |
+| q-035 | 3.5 | Enable virtual machines in firmware |
+| q-036 | 3.4 | Protect data on a striped set |
+| q-037 | 3.6 | Avoid mixing modular PSU cables |
+| q-038 | 3.7 | Set the default print output |
+| q-039 | 3.8 | Maintain a receipt printer |
+| q-040 | 3.2 | Connect a digital display and audio |
+| q-041 | 3.4 | Select a PCIe storage drive |
+| q-042 | 3.3 | Match memory to a compact system |
+| q-043 | 3.5 | Identify the CPU power connector |
+| q-044 | 3.1 | Choose an LCD panel for shared viewing |
+| q-045 | 3.8 | Understand the laser imaging sequence |
+| q-046 | 3.6 | Size a power supply for added drives |
+| q-047 | 3.7 | Deploy a shared printer queue |
+| q-048 | 3.4 | Identify a magnetic drive characteristic |
+| q-049 | 3.5 | Add a capture card |
+| q-050 | 3.2 | Recognize an optical patch connector |
+| q-051 | 3.3 | Populate a two-channel memory board |
+| q-052 | 3.7 | Configure scan delivery |
+| q-053 | 3.8 | Service an impact printer |
+| q-054 | 4.1 | Recognize a desktop hypervisor |
+| q-055 | 4.2 | Limit infrastructure to one organization |
+| q-056 | 4.1 | Connect a VM to the physical LAN |
+| q-057 | 4.2 | Combine a private cloud with public capacity |
+| q-058 | 4.1 | Use a virtual workstation remotely |
+| q-059 | 4.2 | Explain shared cloud infrastructure |
+| q-060 | 4.1 | Prepare a disposable test environment |
+| q-061 | 4.2 | Support metered cloud purchasing |
+| q-062 | 4.2 | Classify two purchased cloud services |
+| q-063 | 5.1 | A new build shuts off under the bench test |
+| q-064 | 5.2 | A drive disappears only after transport |
+| q-065 | 5.3 | A conference screen says no signal |
+| q-066 | 5.4 | A phone becomes hot in a vehicle |
+| q-067 | 5.5 | Find the shared network outage |
+| q-068 | 5.6 | A printer stops at the same paper position |
+| q-069 | 5.1 | A desktop will not power on after service |
+| q-070 | 5.2 | A hard drive clicks and drops offline |
+| q-071 | 5.3 | An image is stretched on a new monitor |
+| q-072 | 5.4 | Find a sudden battery drain |
+| q-073 | 5.5 | The new access point cannot serve clients |
+| q-074 | 5.6 | A color print has the wrong colors |
+| q-075 | 5.1 | Isolate intermittent memory errors |
+| q-076 | 5.2 | An external drive needs more power |
+| q-077 | 5.3 | A projector shuts down during presentations |
+| q-078 | 5.4 | A touch screen responds without contact |
+| q-079 | 5.5 | Resolve a local address mismatch |
+| q-080 | 5.6 | The printer is waiting for the wrong paper |
+| q-081 | 5.5 | A new firewall policy breaks name lookups |
+| q-082 | 5.1 | Unexpected restart under graphics load |
+| q-083 | 5.2 | A mirror remains degraded after replacement |
+| q-084 | 5.5 | Diagnose an Ethernet duplex mismatch |
+| q-085 | 5.6 | A network printer changed addresses |

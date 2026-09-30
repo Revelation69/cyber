@@ -53,6 +53,8 @@ The SOHO addressing, RAID, mobile support, VM allocation and POST labs each belo
 
 Passing named 220-1201 attempts unlock **View / print mock certificate** in the results. Open it and use **Print / Save as PDF**. The server uses the immutable result to supply the candidate name, score, UTC issue date, exam code and reference ID. Active, failed, anonymous and legacy attempts cannot obtain a certificate. It is explicitly an unproctored mock award, not an official CompTIA certificate, certification or identity verification. Save it before starting a new attempt, which replaces access to the previous report in that browser.
 
+The current question bank is **1201-2026.09-v2**, a complete replacement of all 90 items reviewed on 30 September 2026. Its [curriculum audit](docs/curriculum.md) maps every item to an objective. Saved v1 attempts retain their own questions, RAID inventory, answers and certificates. Start a new attempt after deploying v2 to receive the new form.
+
 Existing 220-1101 sessions keep their original question snapshots, labels and domain weights. They are not silently converted or awarded 220-1201 certificates. Starting a new attempt switches to the new bank.
 
 ## Scoring

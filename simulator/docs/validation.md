@@ -1,3 +1,15 @@
+# Complete question-bank refresh — 30 September 2026
+
+- **27 automated tests passed** locally: the existing identity, scoring, deadline, persistence and certificate checks, plus new checks for RAID 10 spare/member selection, frozen per-attempt inventories, old RAID 5 compatibility, and unsolvable PBQ configuration rejection.
+- All **90 prompts and titles differ** from v1. The new bank has 70 single-answer items, 15 multiple-response items and five new labs, with counts 12/21/22/10/25 and coverage of all 27 numbered 220-1201 objectives.
+- JavaScript syntax checks passed. The frontend rendering and certificate design are unchanged.
+- Browser visual verification was unavailable in this session because the browser policy check could not be verified. No browser security controls were bypassed.
+- The EC2 instance was verified stopped. `AWS_DEPLOY_ENABLED` was set to `false` before publishing so CI can validate without deploying or starting the host.
+
+The final production container built successfully and passed the real HTTP smoke test with `--verify-certificate`: health, private answer-key isolation, saves, flags, navigation, timer, RAID commands, immutable submission, and a passing named certificate. It ran locally as the normal non-root user with a read-only filesystem and temporary data storage. GitHub Actions reruns the same unit and container checks; its deployment job is gated off while `AWS_DEPLOY_ENABLED=false`.
+
+## Previous release validation (historical)
+
 # 220-1201 upgrade validation — 26 September 2026
 
 - 23 behavioral tests passed: required/normalized Unicode names, immutable identity, passing-only certificates, anonymous-session denial, escaping, stable certificates, expired passes and preserved legacy labels/domain weights.

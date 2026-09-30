@@ -84,7 +84,7 @@ def main():
                 continue
             request("/api/exam", "PATCH", {"question_id": question["id"],
                     "answer": question.get("expected", question.get("answer"))})
-        for command in ("raid status", "raid identify SN-B204", "raid replace SN-B204 SN-E505", "raid rebuild"):
+        for command in ("raid status", "raid identify SN-R402", "raid replace SN-R402 SN-R900", "raid rebuild"):
             request("/api/exam/command", "POST", {"command": command})
         passed = request("/api/exam/submit", "POST", {})["report"]
         assert passed["score"] == 900 and passed["passed"]
