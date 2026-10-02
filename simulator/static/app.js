@@ -54,6 +54,8 @@
   let reviewFilter = "all";
   let toastTimer = null;
   let pendingCommand = null;
+  let resetNotice = "";
+  let checkingVersion = false;
 
   async function request(path, method = "GET", body) {
     const controller = new AbortController();
@@ -66,6 +68,8 @@
         signal: controller.signal,
         headers: {
           Accept: "application/json",
+          ...(session && method !== "GET" && !(path === "/api/exam" && method === "POST")
+            ? { "X-Exam-Bank": session.bank_version, "X-Exam-Id": session.id } : {}),
           ...(method !== "GET" ? { "Content-Type": "application/json" } : {}),
         },
         ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
@@ -86,9 +90,47 @@
           `The server could not complete that action (${response.status}).`,
       );
       error.status = response.status;
+      error.code = data.code;
+      if (data.code === "exam_reset") resetAttempt(data.error);
       throw error;
     }
     return data;
+  }
+
+  function resetAttempt(message) {
+    pending.clear();
+    clearTimeout(debounce);
+    pendingCommand = null;
+    session = null;
+    answers = {};
+    flags = [];
+    index = 0;
+    offset = 0;
+    expiryRequested = false;
+    saveStatus = "saved";
+    saveError = "";
+    reviewFilter = "all";
+    view = "overview";
+    resetNotice = message;
+    if (dialog.open) dialog.close();
+    setBusy(false);
+    if (meta) render(true);
+  }
+
+  async function checkBankVersion() {
+    if (!session || busy || checkingVersion || document.hidden) return;
+    checkingVersion = true;
+    try {
+      const latest = await request("/api/meta");
+      if (session && session.bank_version !== latest.blueprint.bank_version) {
+        meta = latest;
+        resetAttempt("New questions are available. Enter your name to start a fresh exam; previous answers and time do not carry over.");
+      }
+    } catch (_) {
+      // Connectivity errors must not erase a valid current attempt.
+    } finally {
+      checkingVersion = false;
+    }
   }
 
   function adopt(next, hydrate = false) {
@@ -154,10 +196,10 @@
       <a class="brand" href="#" data-action="overview" aria-label="Core 1 overview"><span class="brand-mark">${icon("logo", 23)}</span><span class="brand-name">core<span> / 01</span></span></a>
       <div class="brand-caption">THE EXAM WORKSPACE</div><div class="nav-label">YOUR WORKSPACE</div>
       <nav aria-label="Main"><button class="nav-button ${view === "overview" ? "active" : ""}" data-action="overview" aria-label="Overview" ${view === "overview" ? 'aria-current="page"' : ""}>${icon("grid")}<span>Overview</span></button>
-      <button class="nav-button ${view === "exam" ? "active" : ""}" data-action="exam" aria-label="Exam workspace" ${!session || session.status !== "active" ? "disabled" : ""} ${view === "exam" ? 'aria-current="page"' : ""}>${icon("book")}<span>Exam workspace</span>${session?.status === "active" ? '<span class="nav-badge">LIVE</span>' : ""}</button>
+      <button class="nav-button ${view === "exam" ? "active" : ""}" data-action="exam" aria-label="Exam workspace" ${!session || session?.status !== "active" ? "disabled" : ""} ${view === "exam" ? 'aria-current="page"' : ""}>${icon("book")}<span>Exam workspace</span>${session?.status === "active" ? '<span class="nav-badge">LIVE</span>' : ""}</button>
       <button class="nav-button ${view === "results" ? "active" : ""}" data-action="results" aria-label="Results" ${!session?.report ? "disabled" : ""} ${view === "results" ? 'aria-current="page"' : ""}>${icon("chart")}<span>Results & review</span></button></nav>
       <div class="sidebar-bottom"><div class="edition-card"><div class="edition-line"><span class="edition-dot"></span> A+ Core 1 · ${esc(view === "overview" ? meta.exam_code : session?.exam_code || meta.exam_code)}</div><p>Objectives-aligned practice.<br>Independent practice material.</p></div><div class="sidebar-foot">${icon("lock", 12)} Your progress, saved automatically</div></div>
-      </aside><div class="workspace"><header class="topbar ${session?.status === "active" ? "with-timer" : ""}"><div class="breadcrumb">Certification practice <span>/</span> <strong>${esc(crumb)}</strong></div>${session?.status === "active" ? '<div class="compact-timer" aria-label="Time remaining"><span>Time left</span><strong id="compact-timer-value" class="mono"></strong></div>' : '<div class="workspace-status">Practice workspace</div>'}</header><main class="content ${view === "exam" ? "exam-content" : ""}" id="main" tabindex="-1">${session?.exam_code === "220-1101" && view !== "overview" ? '<div class="legacy-notice" role="note">This saved attempt uses the retired 220-1101 bank. Its original questions and scoring are preserved. Start a new attempt from Overview to practice 220-1201.</div>' : ""}${content}</main></div></div>`;
+      </aside><div class="workspace"><header class="topbar ${session?.status === "active" ? "with-timer" : ""}"><div class="breadcrumb">Certification practice <span>/</span> <strong>${esc(crumb)}</strong></div>${session?.status === "active" ? '<div class="compact-timer" aria-label="Time remaining"><span>Time left</span><strong id="compact-timer-value" class="mono"></strong></div>' : '<div class="workspace-status">Practice workspace</div>'}</header><main class="content ${view === "exam" ? "exam-content" : ""}" id="main" tabindex="-1">${content}</main></div></div>`;
   }
   function footer() {
     return `<p class="page-foot">${icon("info", 13)}<span>${esc(view === "overview" ? meta.disclaimer : session?.disclaimer || meta.disclaimer)}</span></p>`;
@@ -165,6 +207,7 @@
   function overview() {
     const active = session?.status === "active";
     return `<div class="page-heading"><div><div class="eyebrow">A+ CORE 1 · 220-1201</div><h1>Core 1 practice exam</h1><p>Your space to put knowledge into practice and see where you stand.</p></div><span class="version-pill">220-1201 · OBJECTIVES v4.0</span></div>
+      ${resetNotice ? `<div class="legacy-notice" role="status">${esc(resetNotice)}</div>` : ""}
       <div class="stats-row"><div class="stat-card"><span class="stat-icon">${icon("book", 21)}</span><div><div class="stat-value">${meta.question_count} <span>questions</span></div><div class="stat-label">Including 5 interactive labs</div></div></div><div class="stat-card"><span class="stat-icon">${icon("clock", 21)}</span><div><div class="stat-value">${meta.duration_seconds / 60} <span>minutes</span></div><div class="stat-label">One uninterrupted session</div></div></div><div class="stat-card"><span class="stat-icon">${icon("shield", 21)}</span><div><div class="stat-value">675 <span>/ 900</span></div><div class="stat-label">Practice passing threshold</div></div></div></div>
       <div class="dashboard-grid"><section class="launch-card"><div class="launch-tag">${icon("bolt", 14)} ${active ? "SESSION IN PROGRESS" : "FULL-LENGTH EXAM"}</div><h2>${active ? "Pick up where you left off." : "90 questions. Five practical labs."}</h2><p>${active ? `${answeredCount()} of ${meta.question_count} questions answered. Your timer is still running; return to your session to continue.` : "Work through realistic scenarios and practical labs across all five Core 1 domains. Review your results when you finish."}</p>${!active ? nameField() : ""}<button class="btn primary" data-action="${active ? "exam" : "start"}">${active ? "Resume exam" : "Start practice exam"} ${icon("arrow", 16)}</button><div class="launch-footer">${icon("lock", 11)} ${active ? "Answers are saved to this workspace" : "Your timer starts when you begin"}</div>${active && session.exam_code !== meta.exam_code ? '<p class="legacy-notice">Your saved attempt is 220-1101.</p><button class="btn" data-action="new-dialog">Start 220-1201 instead</button>' : ""}</section>
       <section class="panel blueprint" aria-labelledby="blueprint-title"><div class="card-heading"><h2 id="blueprint-title">The exam blueprint</h2><span class="eyebrow">5 DOMAINS</span></div><div class="domain-list">${meta.domains.map((domain) => `<div class="domain-row"><div class="domain-top"><span>${esc(shortDomain(domain.name))}</span><strong>${domain.weight}%</strong></div><progress class="domain-track" max="100" value="${domain.weight}" aria-label="${esc(domain.name)} blueprint weight ${domain.weight} percent"></progress></div>`).join("")}</div><p class="blueprint-foot">Mapped to all 27 numbered 220-1201 objectives. This fixed 90-item practice form samples the published scope; it does not reproduce the real exam.</p></section></div>
@@ -298,7 +341,7 @@
     const review = report.review.filter(
       (item) => reviewFilter !== "practice" || !item.correct,
     );
-    return `<div class="page-heading"><div><div class="eyebrow">SESSION COMPLETE · ${session.status === "expired" ? "TIME EXPIRED" : "RESULTS & REVIEW"}</div><h1>Your practice results</h1>${session.candidate_name ? `<p class="candidate-result" dir="auto">${esc(session.candidate_name)} · ${esc(session.exam_code)}</p>` : ""}<p>${passed ? "You reached the practice threshold. Keep building on what you know." : "Every attempt points the way forward. Let’s find your next focus."}</p></div><button class="btn" data-action="new-dialog">${icon("restart", 14)} New attempt</button></div><div class="result-grid"><section class="panel score-card" aria-label="Scaled practice score"><div class="score-tag">YOUR PRACTICE SCORE</div><div class="score-ring"><svg class="score-circle" width="169" height="169" viewBox="0 0 169 169" aria-hidden="true"><circle cx="84.5" cy="84.5" r="75" fill="none" stroke="#eeebf8" stroke-width="8"/><circle cx="84.5" cy="84.5" r="75" fill="none" stroke="#7764d4" stroke-width="8" stroke-linecap="round" stroke-dasharray="${portion * circumference} ${circumference}" transform="rotate(-90 84.5 84.5)"/></svg><div class="score-ring-inner"><div class="score-number">${report.score}</div><div class="score-out-of">OUT OF 900</div></div></div><span class="result-badge ${passed ? "pass" : ""}">${passed ? "Practice threshold reached" : "Keep practicing"}</span><p>Practice pass: 675 · Score range: 100–900</p><div class="result-meta"><div><strong>${durationLabel(report.elapsed_seconds)}</strong>Time elapsed</div><div><strong>${answeredCount()} / ${session.questions.length}</strong>Answered</div><div><strong>${passed ? "Pass" : "Below threshold"}</strong>Practice outcome</div></div></section><section class="panel result-domains"><div class="card-heading"><h2>Where you stand</h2><span class="eyebrow">BY DOMAIN</span></div><div class="domain-list">${report.domains.map((domain) => `<div class="domain-row"><div class="domain-top"><span>${esc(shortDomain(domain.name))}</span><strong>${Math.round(domain.percent)}%</strong></div><progress class="domain-track" value="${Math.max(0, Math.min(100, domain.percent))}" max="100" aria-label="${esc(domain.name)} performance ${Math.round(domain.percent)} percent"></progress></div>`).join("")}</div><p>Domain performance reflects weighted scored points. Labs award partial credit. Five undisclosed pilot questions are excluded from the score.</p></section></div>${report.certificate ? `<section class="panel certificate-callout"><div><span class="eyebrow">YOUR PRACTICE MILESTONE</span><h2>Your mock certificate is ready</h2><p>Issued to <strong dir="auto">${esc(report.certificate.candidate_name)}</strong>. A practice award, not an official CompTIA qualification.</p><p>Save it before starting a new attempt. The new attempt replaces access to this report in this browser.</p></div><a class="btn primary" href="/api/exam/certificate" target="_blank" rel="noopener">View / print mock certificate</a></section>` : ""}<section class="review-section" aria-labelledby="review-title"><div class="review-header"><div><h2 id="review-title">Question review</h2><p>Open a question to see your answer and the reasoning behind it.</p></div><div class="filter-tabs" aria-label="Filter review"><button class="${reviewFilter === "all" ? "active" : ""}" data-filter="all" aria-pressed="${reviewFilter === "all"}">All questions (${report.review.length})</button><button class="${reviewFilter === "practice" ? "active" : ""}" data-filter="practice" aria-pressed="${reviewFilter === "practice"}">Needs practice (${report.review.filter((item) => !item.correct).length})</button></div></div><div class="review-list">${
+    return `<div class="page-heading"><div><div class="eyebrow">SESSION COMPLETE · ${session?.status === "expired" ? "TIME EXPIRED" : "RESULTS & REVIEW"}</div><h1>Your practice results</h1>${session.candidate_name ? `<p class="candidate-result" dir="auto">${esc(session.candidate_name)} · ${esc(session.exam_code)}</p>` : ""}<p>${passed ? "You reached the practice threshold. Keep building on what you know." : "Every attempt points the way forward. Let’s find your next focus."}</p></div><button class="btn" data-action="new-dialog">${icon("restart", 14)} New attempt</button></div><div class="result-grid"><section class="panel score-card" aria-label="Scaled practice score"><div class="score-tag">YOUR PRACTICE SCORE</div><div class="score-ring"><svg class="score-circle" width="169" height="169" viewBox="0 0 169 169" aria-hidden="true"><circle cx="84.5" cy="84.5" r="75" fill="none" stroke="#eeebf8" stroke-width="8"/><circle cx="84.5" cy="84.5" r="75" fill="none" stroke="#7764d4" stroke-width="8" stroke-linecap="round" stroke-dasharray="${portion * circumference} ${circumference}" transform="rotate(-90 84.5 84.5)"/></svg><div class="score-ring-inner"><div class="score-number">${report.score}</div><div class="score-out-of">OUT OF 900</div></div></div><span class="result-badge ${passed ? "pass" : ""}">${passed ? "Practice threshold reached" : "Keep practicing"}</span><p>Practice pass: 675 · Score range: 100–900</p><div class="result-meta"><div><strong>${durationLabel(report.elapsed_seconds)}</strong>Time elapsed</div><div><strong>${answeredCount()} / ${session.questions.length}</strong>Answered</div><div><strong>${passed ? "Pass" : "Below threshold"}</strong>Practice outcome</div></div></section><section class="panel result-domains"><div class="card-heading"><h2>Where you stand</h2><span class="eyebrow">BY DOMAIN</span></div><div class="domain-list">${report.domains.map((domain) => `<div class="domain-row"><div class="domain-top"><span>${esc(shortDomain(domain.name))}</span><strong>${Math.round(domain.percent)}%</strong></div><progress class="domain-track" value="${Math.max(0, Math.min(100, domain.percent))}" max="100" aria-label="${esc(domain.name)} performance ${Math.round(domain.percent)} percent"></progress></div>`).join("")}</div><p>Domain performance reflects weighted scored points. Labs award partial credit. Five undisclosed pilot questions are excluded from the score.</p></section></div>${report.certificate ? `<section class="panel certificate-callout"><div><span class="eyebrow">YOUR PRACTICE MILESTONE</span><h2>Your mock certificate is ready</h2><p>Issued to <strong dir="auto">${esc(report.certificate.candidate_name)}</strong>. A practice award, not an official CompTIA qualification.</p><p>Save it before starting a new attempt. The new attempt replaces access to this report in this browser.</p></div><a class="btn primary" href="/api/exam/certificate" target="_blank" rel="noopener">View / print mock certificate</a></section>` : ""}<section class="review-section" aria-labelledby="review-title"><div class="review-header"><div><h2 id="review-title">Question review</h2><p>Open a question to see your answer and the reasoning behind it.</p></div><div class="filter-tabs" aria-label="Filter review"><button class="${reviewFilter === "all" ? "active" : ""}" data-filter="all" aria-pressed="${reviewFilter === "all"}">All questions (${report.review.length})</button><button class="${reviewFilter === "practice" ? "active" : ""}" data-filter="practice" aria-pressed="${reviewFilter === "practice"}">Needs practice (${report.review.filter((item) => !item.correct).length})</button></div></div><div class="review-list">${
       review.length
         ? review
             .map((item) => {
@@ -349,7 +392,7 @@
       count.textContent = `${answeredCount()} / ${session.questions.length}`;
   }
   function queueSave(questionId, patch) {
-    if (!session || session.status !== "active") return;
+    if (!session || session?.status !== "active") return;
     const previous = pending.get(questionId) || {};
     pending.set(questionId, { ...previous, ...patch, question_id: questionId });
     saveStatus = "saving";
@@ -367,16 +410,17 @@
       if (pending.size) return flushSaves();
       return;
     }
-    if (!pending.size || session.status !== "active") return;
+    if (!pending.size || session?.status !== "active") return;
     savePromise = (async () => {
       saveStatus = "saving";
       updateSaveStatus();
-      while (pending.size && session.status === "active") {
+      while (pending.size && session?.status === "active") {
         const [questionId, patch] = pending.entries().next().value;
         pending.delete(questionId);
         try {
           adopt(await request("/api/exam", "PATCH", patch));
         } catch (error) {
+          if (error.code === "exam_reset") throw error;
           pending.set(questionId, {
             ...patch,
             ...(pending.get(questionId) || {}),
@@ -408,7 +452,7 @@
     if (command) command.disabled = value;
   }
   async function navigate(next) {
-    if (busy || next < 0 || next >= session.questions.length) return;
+    if (!session || busy || next < 0 || next >= session.questions.length) return;
     if (pendingCommand) {
       toast(
         "Retry the unsaved RAID command before leaving this question.",
@@ -419,12 +463,12 @@
     setBusy(true);
     try {
       await flushSaves();
-      if (session.status !== "active") return;
+      if (session?.status !== "active") return;
       const response = await request("/api/exam", "PATCH", {
         current_index: next,
       });
       adopt(response);
-      if (session.status === "active") {
+      if (session?.status === "active") {
         index = next;
         render(true);
       }
@@ -472,13 +516,14 @@
     }
     try {
       const response = await request("/api/exam", "POST", { candidate_name: candidateName });
+      resetNotice = "";
       pending.clear();
       expiryRequested = false;
       pendingCommand = null;
       saveStatus = "saved";
       reviewFilter = "all";
       adopt(response, true);
-      view = session.status === "active" ? "exam" : "results";
+      view = session?.status === "active" ? "exam" : "results";
       if (dialog.open) dialog.close();
       render(true);
     } catch (error) {
@@ -506,12 +551,14 @@
     try {
       if (expired) await flushSaves().catch(() => {});
       else await flushSaves();
-      if (session.status === "active")
+      if (!session) return;
+      if (session?.status === "active")
         adopt(await request("/api/exam/submit", "POST", {}), true);
       view = "results";
       if (dialog.open) dialog.close();
       render(true);
     } catch (error) {
+      if (error.code === "exam_reset") return;
       const target = $("#dialog-error");
       if (target) {
         target.textContent = error.message;
@@ -548,7 +595,7 @@
     $("#cancel-dialog").focus();
   }
   function updateTimer() {
-    if (!session || session.status !== "active") return;
+    if (!session || session?.status !== "active") return;
     const seconds = remaining();
     const compact = $("#compact-timer-value");
     if (compact) {
@@ -574,7 +621,7 @@
   }
 
   app.addEventListener("change", (event) => {
-    if (busy || !session || session.status !== "active") return;
+    if (busy || !session || session?.status !== "active") return;
     if (event.target.matches('input[name="question-answer"]')) {
       const question = session.questions[index];
       const selected = Array.from(
@@ -604,7 +651,7 @@
     if (event.target.matches("select[data-field]")) saveField(event.target);
   });
   app.addEventListener("input", (event) => {
-    if (busy || !session || session.status !== "active") return;
+    if (busy || !session || session?.status !== "active") return;
     if (event.target.matches("input[data-field]")) saveField(event.target);
   });
   function saveField(input) {
@@ -623,7 +670,7 @@
   app.addEventListener("submit", async (event) => {
     if (event.target.id !== "terminal-form") return;
     event.preventDefault();
-    if (busy || session.status !== "active") return;
+    if (busy || session?.status !== "active") return;
     const input = $("#raid-command");
     const command = input.value.trim();
     if (!command) return;
@@ -636,13 +683,14 @@
     updateSaveStatus();
     try {
       await flushSaves();
-      if (session.status !== "active") return;
+      if (session?.status !== "active") return;
       adopt(await request("/api/exam/command", "POST", { command }));
       pendingCommand = null;
       saveStatus = "saved";
       render();
       $("#raid-command")?.focus();
     } catch (error) {
+      if (error.code === "exam_reset") return;
       saveStatus = "error";
       saveError = error.message;
       updateSaveStatus();
@@ -752,9 +800,13 @@
     if (session?.status === "active" && remaining() === 0) submit(true);
   });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) updateTimer();
+    if (!document.hidden) {
+      updateTimer();
+      checkBankVersion();
+    }
   });
   setInterval(updateTimer, 1000);
+  setInterval(checkBankVersion, 30000);
 
   async function boot() {
     try {
@@ -762,10 +814,11 @@
       try {
         adopt(await request("/api/exam"), true);
       } catch (error) {
-        if (error.status !== 404) throw error;
+        if (error.status !== 404 && error.code !== "exam_reset") throw error;
+        if (error.status === 404) resetAttempt("");
       }
       view = session
-        ? session.status === "active"
+        ? session?.status === "active"
           ? "exam"
           : "results"
         : "overview";

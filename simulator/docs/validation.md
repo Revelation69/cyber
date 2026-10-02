@@ -1,3 +1,16 @@
+# October replacement form and forced fresh attempts
+
+2 October 2026: bank `1201-2026.10-v3` has 90 new titles/prompts/explanations, 70 single-answer and 15 multiple-response choices, five replacement labs, counts 12/21/22/10/25 and all 27 numbered objectives. No prompt is reused from v2; the choice sequence mixes domains.
+
+- **30 Python tests passed**, including a matrix of retired versions, statuses and read/write/certificate routes; fresh answers/flags/timer; current-version persistence; and rejection of obsolete-tab writes without deleting a fresh cookie.
+- **5 frontend controller tests passed** using the real JavaScript with a minimal DOM adapter: retired boot, rejected autosave without requeueing, bank-change reset, preserving a valid attempt during a connectivity error, and a reset during timer submission. These are unit tests, not a rendered browser audit.
+- JavaScript syntax checks passed. The HTTP smoke test now compares the entire public form with the authored bank and checks the version before completing scoring and certificate flows.
+- The deployment still takes its normal predeployment database backup. Old records are not deleted, but the application refuses to serve or modify attempts from retired versions.
+
+The local production-container check exposed SQLite WAL initialization contention between Gunicorn workers on a new database. Startup now retries only SQLite BUSY/LOCKED errors within a bounded window using a fresh connection; tests also confirm other database errors are not hidden. Browser visual verification remains unavailable because the browser policy check could not be verified. The rebuilt production container remained healthy and passed the complete HTTP smoke test, including public-form equality with the authored bank, version, saving, flags, navigation, timer, RAID, report immutability and a named passing certificate. Live verification is recorded with the deployment result. Earlier release evidence below is historical and does not describe the current reset policy.
+
+## Historical release validation
+
 # Complete question-bank refresh — 30 September 2026
 
 - **27 automated tests passed** locally: the existing identity, scoring, deadline, persistence and certificate checks, plus new checks for RAID 10 spare/member selection, frozen per-attempt inventories, old RAID 5 compatibility, and unsolvable PBQ configuration rejection.

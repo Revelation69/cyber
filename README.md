@@ -6,7 +6,7 @@
 - [Core 1 simulator](simulator/README.md): a 220-1201 practice app with 90 questions and five interactive labs.
 - [AWS deployment](infra/README.md): infrastructure, GitHub Actions, operations, rollback and costs.
 
-The existing EC2 instance was restarted on 30 September 2026 and is serving the complete replacement bank **1201-2026.09-v2** from application commit `4401dc0`. [Deployment run 36693084534](https://github.com/Revelation69/cyber/actions/runs/36693084534) passed both testing and AWS deployment. Live HTTP checks passed for saved progress, scoring, RAID commands and named mock certificates. Automatic AWS deployment is enabled (`AWS_DEPLOY_ENABLED=true`).
+The current repository release is **1201-2026.10-v3**, a complete replacement of all 90 questions. This release resets access to older saved attempts: reload the site, enter your name and begin a fresh exam. Answers, flags, lab progress and elapsed time from older forms are not carried over. Automatic AWS deployment is enabled; GitHub Actions validates and deploys changes to the application.
 
 ## Run the simulator locally
 
@@ -25,4 +25,4 @@ The simulator is independent practice material, not an official CompTIA exam or 
 
 Pull requests run application tests, infrastructure validation and a real container HTTP smoke test. When `AWS_DEPLOY_ENABLED=true`, updates to `main` pass the same checks, then publish an immutable image to ECR and deploy it to the EC2 host through Systems Manager. GitHub uses OIDC and a repository/branch-scoped role; AWS access keys are not stored in GitHub.
 
-Start a new exam attempt to use v2; existing attempts preserve their original question set and progress. If the instance is stopped again, pause automatic deployment until it is restarted and Systems Manager is online. Restarting an instance alone does not install newer repository changes; a pipeline deployment is still required.
+Current-version attempts resume normally; older forms are retired when a new bank is deployed. If the instance is stopped again, pause automatic deployment until it is restarted and Systems Manager is online. Restarting an instance alone does not install newer repository changes; a pipeline deployment is still required.

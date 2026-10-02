@@ -149,18 +149,8 @@ def initial_raid():
     }
 
 
-# Old snapshots did not contain controller configuration. Keep their original
-# inventory so an in-progress v1/legacy lab remains solvable after a bank update.
-LEGACY_RAID_CONFIG = {
-    "level": "RAID 5", "failed": "SN-B204", "spare": "SN-E505", "bay": 2,
-    "disk_type": "2 TB SAS", "members": ["SN-A103", "SN-B204", "SN-C305"],
-    "other_spares": [], "degraded_detail": "One disk redundancy lost.",
-}
-
-
-def run_raid_command(raid, command, config=None):
-    """Interpret an exact allowlist against this attempt's frozen inventory."""
-    config = LEGACY_RAID_CONFIG if config is None else config
+def run_raid_command(raid, command, config):
+    """Interpret an exact allowlist against this current attempt's inventory."""
     level, failed, spare, bay = (config[k] for k in ("level", "failed", "spare", "bay"))
     normalized = " ".join(command.split()).lower()
     if normalized == "clear":
@@ -425,9 +415,21 @@ def create_app(config=None):
         connection.execute("PRAGMA busy_timeout = 10000")
         return connection
 
-    with closing(connect()) as connection:
-        connection.execute("PRAGMA journal_mode = WAL")
-        connection.execute("CREATE TABLE IF NOT EXISTS exams (token_hash TEXT PRIMARY KEY, payload TEXT NOT NULL)")
+    # Multiple Gunicorn workers can initialize a new database simultaneously.
+    # SQLite may return BUSY during the WAL transition without waiting on its
+    # busy timeout. Retry that startup contention with a fresh connection.
+    startup_deadline = time.monotonic() + 10
+    while True:
+        try:
+            with closing(connect()) as connection:
+                connection.execute("PRAGMA journal_mode = WAL")
+                connection.execute("CREATE TABLE IF NOT EXISTS exams (token_hash TEXT PRIMARY KEY, payload TEXT NOT NULL)")
+            break
+        except sqlite3.OperationalError as error:
+            code = getattr(error, "sqlite_errorcode", 0) & 0xFF
+            if code not in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED) or time.monotonic() >= startup_deadline:
+                raise
+            time.sleep(0.05)
 
     def token_hash():
         token = request.cookies.get(COOKIE_NAME, "")
@@ -439,6 +441,23 @@ def create_app(config=None):
         key = token_hash()
         row = connection.execute("SELECT payload FROM exams WHERE token_hash = ?", (key,)).fetchone() if key else None
         return (key, json.loads(row["payload"])) if row else (None, None)
+
+    def is_current_attempt(exam):
+        return (exam.get("exam_code") == EXAM_CODE
+                and exam.get("bank_version") == BLUEPRINT["bank_version"])
+
+    def reset_required(clear_cookie=True):
+        response = jsonify(
+            code="exam_reset",
+            error="The question set has been replaced. Reload the page and enter your name to start a fresh exam. Previous answers and time do not carry over.",
+            bank_version=BLUEPRINT["bank_version"],
+        )
+        response.status_code = 409
+        if clear_cookie:
+            response.delete_cookie(COOKIE_NAME, path="/", httponly=True,
+                                   secure=app.config["COOKIE_SECURE"] or request.is_secure,
+                                   samesite="Strict")
+        return response
 
     def save_exam(connection, key, exam):
         connection.execute("UPDATE exams SET payload = ? WHERE token_hash = ?", (json.dumps(exam), key))
@@ -478,7 +497,7 @@ def create_app(config=None):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "same-origin"
         response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
-        if request.path.startswith("/api/"):
+        if request.path.startswith("/api/") or request.path == "/":
             response.headers["Cache-Control"] = "no-store"
         return response
 
@@ -532,7 +551,7 @@ def create_app(config=None):
         try:
             connection.execute("BEGIN IMMEDIATE")
             old_key, old_exam = read_exam(connection)
-            if old_exam:
+            if old_exam and is_current_attempt(old_exam):
                 expire(old_exam, now)
                 save_exam(connection, old_key, old_exam)
             connection.execute("INSERT INTO exams (token_hash, payload) VALUES (?, ?)", (key, json.dumps(exam)))
@@ -554,6 +573,8 @@ def create_app(config=None):
             _, exam = read_exam(connection)
         if exam is None:
             return jsonify(error="No saved exam in this browser."), 404
+        if not is_current_attempt(exam):
+            return reset_required()
         report = exam.get("report") or {}
         cert = report.get("certificate")
         if (exam["status"] == "active" or not report.get("passed") or not cert
@@ -574,6 +595,14 @@ def create_app(config=None):
             key, exam = read_exam(connection)
             if exam is None:
                 return jsonify(error="No saved exam in this browser. Start a new attempt."), 404
+            if not is_current_attempt(exam):
+                return reset_required()
+            if request.method != "GET" and (
+                    request.headers.get("X-Exam-Bank") != exam["bank_version"]
+                    or request.headers.get("X-Exam-Id") != exam["id"]):
+                # An old tab shares cookies with a fresh attempt. Reject its
+                # obsolete answers without deleting the fresh tab's cookie.
+                return reset_required(clear_cookie=False)
             now = int(app.config["NOW"]())
             expire(exam, now)
             if exam["status"] == "active" and request.method != "GET":

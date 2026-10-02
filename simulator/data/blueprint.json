@@ -1,8 +1,8 @@
 {
   "exam_code": "220-1201",
-  "bank_version": "1201-2026.09-v2",
+  "bank_version": "1201-2026.10-v3",
   "objectives_version": "4.0",
-  "reviewed_on": "2026-09-30",
+  "reviewed_on": "2026-10-02",
   "objectives": {
     "1.1": "Mobile hardware service",
     "1.2": "Mobile accessories and connections",
@@ -78,6 +78,36 @@
       "title": "NIST: Cloud computing characteristics and models",
       "url": "https://csrc.nist.gov/Projects/Cloud-Computing",
       "retrieved": "2026-09-30"
+    },
+    {
+      "id": "apple-dual-sim",
+      "title": "Apple: choose a cellular data line",
+      "url": "https://support.apple.com/en-euro/guide/iphone/iph9c5776d3c/ios",
+      "retrieved": "2026-10-02"
+    },
+    {
+      "id": "gps-overview",
+      "title": "GPS.gov: GPS system and receiver overview",
+      "url": "https://www.gps.gov/systems/gps/index.php",
+      "retrieved": "2026-10-02"
+    },
+    {
+      "id": "samsung-displays",
+      "title": "Samsung: Mini LED and OLED distinctions",
+      "url": "https://www.samsung.com/us/tvs/tv-buying-guide/mini-led-vs-oled/",
+      "retrieved": "2026-10-02"
+    },
+    {
+      "id": "zebra-thermal",
+      "title": "Zebra: direct thermal versus thermal transfer",
+      "url": "https://support.zebra.com/article/000012917",
+      "retrieved": "2026-10-02"
+    },
+    {
+      "id": "microsoft-sync-delete",
+      "title": "Microsoft: deleting OneDrive files",
+      "url": "https://support.microsoft.com/en-us/onedrive/delete-files-or-folders-in-onedrive",
+      "retrieved": "2026-10-02"
     }
   ]
 }

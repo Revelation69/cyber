@@ -23,17 +23,28 @@ def main():
     base = args.base_url.rstrip("/")
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
+    identity = {}
+
     def request(path, method="GET", payload=None):
         data = json.dumps(payload).encode() if payload is not None else None
         req = urllib.request.Request(base + path, data=data, method=method,
-                                     headers={"Content-Type": "application/json", "Origin": base})
+                                     headers={"Content-Type": "application/json", "Origin": base, **identity})
         with opener.open(req, timeout=10) as response:
-            return json.load(response)
+            data = json.load(response)
+            if "questions" in data:
+                identity.update({"X-Exam-Bank": data["bank_version"], "X-Exam-Id": data["id"]})
+            return data
 
     assert request("/healthz")["status"] == "ok"
     exam = request("/api/exam", "POST", {"candidate_name": "Deployment Check"})
     assert len(exam["questions"]) == 90
     assert exam["exam_code"] == "220-1201"
+    blueprint = json.loads((Path(__file__).resolve().parents[1] / "data/blueprint.json").read_text())
+    assert exam["bank_version"] == blueprint["bank_version"]
+    local_bank = json.loads((Path(__file__).resolve().parents[1] / "data/questions.json").read_text())
+    for public, authored in zip(exam["questions"], local_bank):
+        for field in ("id", "title", "prompt", "kind", "options", "fields", "briefing", "reference"):
+            assert public.get(field) == authored.get(field), (public["id"], field)
     assert exam["candidate_name"] == "Deployment Check"
     assert exam["remaining_seconds"] <= 5400
     for question in exam["questions"]:
@@ -84,7 +95,7 @@ def main():
                 continue
             request("/api/exam", "PATCH", {"question_id": question["id"],
                     "answer": question.get("expected", question.get("answer"))})
-        for command in ("raid status", "raid identify SN-R402", "raid replace SN-R402 SN-R900", "raid rebuild"):
+        for command in ("raid status", "raid identify SN-T202", "raid replace SN-T202 SN-T700", "raid rebuild"):
             request("/api/exam/command", "POST", {"command": command})
         passed = request("/api/exam/submit", "POST", {})["report"]
         assert passed["score"] == 900 and passed["passed"]

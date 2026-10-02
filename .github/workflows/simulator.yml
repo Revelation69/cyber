@@ -37,6 +37,7 @@ jobs:
       - name: Validate application and infrastructure
         run: |
           python -m unittest discover -s simulator/tests -v
+          node --test simulator/tests/frontend-reset.test.cjs
           node --check simulator/static/app.js
           node --check simulator/static/certificate.js
           bash -n infra/bootstrap.sh infra/deploy.sh scripts/deploy_image.sh

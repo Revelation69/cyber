@@ -13,12 +13,27 @@ import sys
 import tempfile
 from threading import Barrier
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app import (  # noqa: E402
     COOKIE_NAME, DOMAINS, DURATION, RAID_KEYS, create_app, grade_exam,
     question_credit, validate_bank,
 )
+
+
+from flask.testing import FlaskClient
+
+
+class SessionClient(FlaskClient):
+    """Model a browser that binds writes to its loaded attempt, without bypasses."""
+    def open(self, *args, **kwargs):
+        response = super().open(*args, **kwargs)
+        data = response.get_json(silent=True)
+        if response.status_code in (200, 201) and isinstance(data, dict) and "questions" in data:
+            self.environ_base["HTTP_X_EXAM_BANK"] = data["bank_version"]
+            self.environ_base["HTTP_X_EXAM_ID"] = data["id"]
+        return response
 
 
 class ExamTests(unittest.TestCase):
@@ -28,6 +43,7 @@ class ExamTests(unittest.TestCase):
         self.now = 1_800_000_000
         self.config = {"TESTING": True, "DATABASE": self.database, "NOW": lambda: self.now}
         self.app = create_app(self.config)
+        self.app.test_client_class = SessionClient
         self.client = self.app.test_client()
         self.bank = self.app.config["BANK"]
 
@@ -58,6 +74,30 @@ class ExamTests(unittest.TestCase):
         response = self.client.post("/api/exam/command", json={"command": command})
         self.assertEqual(response.status_code, 200, response.get_json())
         return response.get_json()
+
+    def test_startup_retries_sqlite_lock_with_fresh_connection(self):
+        original_connect = sqlite3.connect
+        calls = []
+        locked = sqlite3.OperationalError("database is locked")
+        locked.sqlite_errorcode = sqlite3.SQLITE_BUSY
+        def connect_after_contention(*args, **kwargs):
+            calls.append(1)
+            if len(calls) == 1:
+                raise locked
+            return original_connect(*args, **kwargs)
+        config = {**self.config, "DATABASE": str(Path(self.temp.name) / "new-database.sqlite3")}
+        with patch("app.sqlite3.connect", side_effect=connect_after_contention):
+            restarted = create_app(config)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(restarted.test_client().get("/healthz").status_code, 200)
+
+    def test_startup_does_not_retry_non_lock_database_errors(self):
+        failure = sqlite3.OperationalError("readonly database")
+        failure.sqlite_errorcode = sqlite3.SQLITE_READONLY
+        with patch("app.sqlite3.connect", side_effect=failure) as connect:
+            with self.assertRaises(sqlite3.OperationalError):
+                create_app(self.config)
+            self.assertEqual(connect.call_count, 1)
 
     def test_bank_invariants(self):
         validate_bank(self.bank)
@@ -127,7 +167,7 @@ class ExamTests(unittest.TestCase):
                 continue
             answer = question["expected"] if question["kind"] == "pbq" else question["answer"]
             self.save(question["id"], answer)
-        for command in ("raid status", "raid identify SN-R402", "raid replace SN-R402 SN-R900", "raid rebuild"):
+        for command in ("raid status", "raid identify SN-T202", "raid replace SN-T202 SN-T700", "raid rebuild"):
             self.command(command)
         perfect = self.client.post("/api/exam/submit", json={}).get_json()["report"]
         self.assertEqual((perfect["score"], perfect["earned"], perfect["possible"], perfect["passed"]), (900, 730, 730, True))
@@ -259,7 +299,9 @@ class ExamTests(unittest.TestCase):
         self.command("raid status")
         token = self.client.get_cookie(COOKIE_NAME).value
         self.now += 42
-        restarted = create_app(self.config).test_client()
+        restarted_app = create_app(self.config)
+        restarted_app.test_client_class = SessionClient
+        restarted = restarted_app.test_client()
         restarted.set_cookie(COOKIE_NAME, token)
         resumed = restarted.get("/api/exam").get_json()
         self.assertEqual(resumed["id"], started["id"])
@@ -287,6 +329,7 @@ class ExamTests(unittest.TestCase):
         def write(question):
             client = self.app.test_client()
             client.set_cookie(COOKIE_NAME, token)
+            client.environ_base.update(self.client.environ_base)
             barrier.wait(timeout=5)
             response = client.patch("/api/exam", json={"question_id": question["id"], "answer": question["answer"]})
             return response.status_code
@@ -346,12 +389,12 @@ class ExamTests(unittest.TestCase):
 
     def test_raid_sequence_and_no_shell_or_milestone_forgery(self):
         self.start()
-        for command in ("raid rebuild", "raid replace SN-R402 SN-R900", "raid identify SN-R402", "rm -rf /", "raid status; touch /tmp/unsafe", "raid identify SN-R303"):
+        for command in ("raid rebuild", "raid replace SN-T202 SN-T700", "raid identify SN-T202", "rm -rf /", "raid status; touch /tmp/unsafe", "raid identify SN-T101"):
             state = self.command(command)["raid"]
             self.assertFalse(any(state[key] for key in RAID_KEYS))
         self.assertIn("FAILED", self.command("raid drives")["raid"]["history"][-1]["output"])
         self.assertFalse(self.raw_exam()["raid"]["diagnosed"])
-        for index, command in enumerate(("raid status", "raid identify SN-R402", "raid replace SN-R402 SN-R900", "raid rebuild")):
+        for index, command in enumerate(("raid status", "raid identify SN-T202", "raid replace SN-T202 SN-T700", "raid rebuild")):
             state = self.command(command)["raid"]
             self.assertEqual([state[key] for key in RAID_KEYS], [n <= index for n in range(4)])
         self.assertIn("OPTIMAL", self.command("raid status")["raid"]["history"][-1]["output"])
@@ -366,21 +409,21 @@ class ExamTests(unittest.TestCase):
         self.assertNotIn("raid_config", public["questions"][1])
         self.command("raid status")
         inventory = self.command("raid drives")["raid"]["history"][-1]["output"]
-        for evidence in ("SN-R402", "4 TB SATA", "SN-R800", "insufficient capacity"):
+        for evidence in ("SN-T202", "8 TB SATA", "SN-T500", "insufficient capacity"):
             self.assertIn(evidence, inventory)
-        self.command("raid identify SN-R303")  # Healthy partner cannot be selected.
+        self.command("raid identify SN-T101")  # Healthy partner cannot be selected.
         self.assertFalse(self.raw_exam()["raid"]["identified"])
-        self.command("raid identify SN-R402")
-        self.command("raid replace SN-R402 SN-R800")
+        self.command("raid identify SN-T202")
+        self.command("raid replace SN-T202 SN-T500")
         self.assertFalse(self.raw_exam()["raid"]["replaced"])
         self.command("raid rebuild")
         self.assertFalse(self.raw_exam()["raid"]["rebuilt"])
-        self.command("raid replace SN-R402 SN-R900")
+        self.command("raid replace SN-T202 SN-T700")
         self.command("raid rebuild")
         output = self.command("raid drives")["raid"]["history"][-1]["output"]
-        self.assertIn("Bay 4: SN-R900 | 4 TB SATA | ONLINE", output)
-        self.assertNotIn("SN-R402", output)
-        self.assertIn("RAID 10", self.command("raid status")["raid"]["history"][-1]["output"])
+        self.assertIn("Bay 2: SN-T700 | 8 TB SATA | ONLINE", output)
+        self.assertNotIn("SN-T202", output)
+        self.assertIn("RAID 6", self.command("raid status")["raid"]["history"][-1]["output"])
 
     def test_raid_console_uses_frozen_attempt_inventory(self):
         self.start()
@@ -388,33 +431,12 @@ class ExamTests(unittest.TestCase):
         raid_question["raid_config"]["failed"] = "SN-FUTURE"
         raid_question["title"] = "A future question title"
         self.assertEqual(self.client.get("/api/exam").get_json()["questions"][1]["title"],
-                         "Restore the archive server mirror pair")
+                         "Repair the media archive parity array")
         self.command("raid status")
         self.command("raid identify SN-FUTURE")
         self.assertFalse(self.raw_exam()["raid"]["identified"])
-        self.command("raid identify SN-R402")
+        self.command("raid identify SN-T202")
         self.assertTrue(self.raw_exam()["raid"]["identified"])
-
-    def test_pre_refresh_snapshot_retains_original_raid_console(self):
-        self.start()
-        exam = self.raw_exam()
-        exam["bank_version"] = "1201-2026.09-v1"
-        raid_question = next(q for q in exam["bank"] if q.get("lab") == "raid")
-        del raid_question["raid_config"]  # This property did not exist in v1.
-        raid_question["title"] = "Recover a degraded array"
-        token = self.client.get_cookie(COOKIE_NAME).value
-        with sqlite3.connect(self.database) as connection:
-            connection.execute("UPDATE exams SET payload = ? WHERE token_hash = ?",
-                               (json.dumps(exam), hashlib.sha256(token.encode()).hexdigest()))
-        self.assertIn("RAID 5", self.command("raid status")["raid"]["history"][-1]["output"])
-        self.command("raid identify SN-R402")
-        self.assertFalse(self.raw_exam()["raid"]["identified"])
-        for command in ("raid identify SN-B204", "raid replace SN-B204 SN-E505", "raid rebuild"):
-            self.command(command)
-        self.assertTrue(all(self.raw_exam()["raid"][key] for key in RAID_KEYS))
-        state = self.client.get("/api/exam").get_json()
-        self.assertEqual(state["bank_version"], "1201-2026.09-v1")
-        self.assertEqual(state["questions"][1]["title"], "Recover a degraded array")
 
     def test_metadata_and_health(self):
         self.assertEqual(self.client.get("/healthz").get_json()["status"], "ok")

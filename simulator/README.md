@@ -35,7 +35,7 @@ To stop it, run `docker compose down`. The named database volume is retained. Do
 
 Enter the name to display on your mock certificate before starting. A display name is acceptable; it is saved with the attempt. Names support Unicode, are limited to 80 characters, and cannot be changed after starting. Work through questions in any order, and flag items to revisit. Configuration labs save editable fields; the RAID lab saves each simulated command. The navigator distinguishes completed, unanswered and flagged items. Use the submission confirmation to check incomplete work before ending early.
 
-The browser's HttpOnly cookie identifies its attempt. Reloading or restarting the server preserves the attempt and its original deadline. Closing the browser does not pause time. An expired exam is finalized on the next request, using the deadline as its submission time; the open page requests finalization when its countdown ends. Only answers accepted before the deadline count. A completed report remains available in the same browser; clearing cookies removes that browser's access to it. A new attempt replaces the browser's current attempt, not its predecessor's stored record.
+The browser's HttpOnly cookie identifies its attempt. Reloading or restarting the server preserves a current-version attempt and its original deadline. A release with a new question-bank version requires a fresh attempt. Closing the browser does not pause time. An expired exam is finalized on the next request, using the deadline as its submission time; the open page requests finalization when its countdown ends. Only answers accepted before the deadline count. A completed report remains available in the same browser; clearing cookies removes that browser's access to it. A new attempt replaces the browser's current attempt, not its predecessor's stored record.
 
 The fixed bank contains 70 single-answer, 15 multiple-response and five performance-based items. Repeated attempts reuse these questions; this is deliberate practice, not adaptive testing.
 
@@ -53,9 +53,9 @@ The SOHO addressing, RAID, mobile support, VM allocation and POST labs each belo
 
 Passing named 220-1201 attempts unlock **View / print mock certificate** in the results. Open it and use **Print / Save as PDF**. The server uses the immutable result to supply the candidate name, score, UTC issue date, exam code and reference ID. Active, failed, anonymous and legacy attempts cannot obtain a certificate. It is explicitly an unproctored mock award, not an official CompTIA certificate, certification or identity verification. Save it before starting a new attempt, which replaces access to the previous report in that browser.
 
-The current question bank is **1201-2026.09-v2**, a complete replacement of all 90 items reviewed on 30 September 2026. Its [curriculum audit](docs/curriculum.md) maps every item to an objective. Saved v1 attempts retain their own questions, RAID inventory, answers and certificates. Start a new attempt after deploying v2 to receive the new form.
+The current bank is **1201-2026.10-v3**, reviewed on 2 October 2026, with all 90 questions replaced. See the [curriculum audit](docs/curriculum.md) for objective mapping.
 
-Existing 220-1101 sessions keep their original question snapshots, labels and domain weights. They are not silently converted or awarded 220-1201 certificates. Starting a new attempt switches to the new bank.
+Older saved attempts, including v1, v2 and 220-1101, can no longer resume or expose their questions, reports or certificates. Reload the page and enter your name to start fresh. Old answers, flags, RAID progress and elapsed time are not carried over. Current-version attempts still autosave and resume normally. The server binds writes to both bank version and attempt ID, so an old tab cannot modify a new attempt through shared cookies.
 
 ## Scoring
 

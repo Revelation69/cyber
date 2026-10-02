@@ -5,7 +5,7 @@ import json
 import sqlite3
 import test_app
 import unittest
-from app import COOKIE_NAME, DOMAINS, LEGACY_DOMAINS, grade_exam, create_app, validate_bank
+from app import COOKIE_NAME, DOMAINS, BLUEPRINT, grade_exam, create_app, validate_bank
 
 
 class CertificateTests(unittest.TestCase):
@@ -85,24 +85,88 @@ class CertificateTests(unittest.TestCase):
         self.assertEqual(expired["report"]["certificate"]["issued_at"], started["deadline"])
         self.assertEqual(self.client.get("/api/exam/certificate").status_code, 200)
 
-    def test_legacy_active_and_completed_sessions_keep_original_identity(self):
-        self.start()
+    def test_retired_attempts_are_rejected_on_every_session_endpoint(self):
+        for version in ("1201-2026.09-v2", "1201-2026.09-v1", None):
+            for status in ("active", "submitted", "expired"):
+                for method, path, body in (
+                    ("GET", "/api/exam", None),
+                    ("PATCH", "/api/exam", {"current_index": 12}),
+                    ("POST", "/api/exam/command", {"command": "raid status"}),
+                    ("POST", "/api/exam/submit", {}),
+                    ("GET", "/api/exam/certificate", None),
+                ):
+                    with self.subTest(version=version, status=status, path=path):
+                        self.start()
+                        exam = self.perfect_snapshot()
+                        exam["status"] = status
+                        exam["report"] = grade_exam(exam, self.now, "submitted") if status != "active" else None
+                        if version is None:
+                            exam.pop("bank_version")
+                            exam.pop("exam_code")
+                        else:
+                            exam["bank_version"] = version
+                        self.replace_snapshot(exam)
+                        response = self.client.open(path, method=method, json=body)
+                        self.assertEqual(response.status_code, 409)
+                        data = response.get_json()
+                        self.assertEqual(data["code"], "exam_reset")
+                        self.assertEqual(data["bank_version"], BLUEPRINT["bank_version"])
+                        self.assertFalse({"questions", "answers", "report", "certificate"} & data.keys())
+                        self.assertIn("Max-Age=0", response.headers["Set-Cookie"])
+                        self.assertEqual(response.headers["Cache-Control"], "no-store")
+                        self.assertIsNone(self.client.get_cookie(COOKIE_NAME))
+
+    def test_new_attempt_has_no_retired_answers_flags_or_elapsed_time(self):
+        old = self.start()
         exam = self.perfect_snapshot()
-        for field in ("candidate_name", "exam_code", "bank_version", "domains"):
-            exam.pop(field)
+        exam["bank_version"] = "1201-2026.09-v2"
+        exam["flags"] = ["pbq-1"]
+        exam["current_index"] = 78
+        exam["raid"].update({"diagnosed": True, "identified": True, "replaced": True, "rebuilt": True})
         self.replace_snapshot(exam)
-        old = self.client.get("/api/exam").get_json()
-        self.assertEqual(old["exam_code"], "220-1101")
-        self.assertEqual(old["domains"], LEGACY_DOMAINS)
-        self.assertIn("retired", old["disclaimer"])
-        report = self.client.post("/api/exam/submit", json={}).get_json()["report"]
-        self.assertTrue(report["passed"])
-        self.assertEqual([d["blueprint_weight"] for d in report["domains"]], [15, 20, 25, 11, 29])
-        self.assertIsNone(report["certificate"])
-        self.assertEqual(self.client.get("/api/exam/certificate").status_code, 403)
+        old_token = self.client.get_cookie(COOKIE_NAME).value
+        self.now += 1800
+        fresh = self.start()  # Direct POST also works without a preliminary GET reset.
+        self.assertNotEqual(old["id"], fresh["id"])
+        self.assertNotEqual(old_token, self.client.get_cookie(COOKIE_NAME).value)
+        self.assertEqual(fresh["bank_version"], BLUEPRINT["bank_version"])
+        self.assertEqual(fresh["remaining_seconds"], 5400)
+        self.assertEqual(fresh["current_index"], 0)
+        self.assertEqual(fresh["answers"], {})
+        self.assertEqual(fresh["flags"], [])
+        self.assertIsNone(fresh["report"])
+        self.assertFalse(any(fresh["raid"][key] for key in ("diagnosed", "identified", "replaced", "rebuilt")))
+        # Knowing an old token cannot retrieve the new exam or continue its old one.
+        retired_client = self.app.test_client()
+        retired_client.set_cookie(COOKIE_NAME, old_token)
+        self.assertEqual(retired_client.get("/api/exam").status_code, 409)
+        self.assertEqual(self.client.get("/api/exam").get_json()["id"], fresh["id"])
+
+    def test_old_tab_cannot_write_into_new_attempt_using_shared_cookie(self):
+        old = self.start()
         fresh = self.start()
-        self.assertEqual(fresh["exam_code"], "220-1201")
-        self.assertEqual(fresh["domains"], DOMAINS)
+        fresh_cookie = self.client.get_cookie(COOKIE_NAME).value
+        cases = [
+            {"X-Exam-Bank": "", "X-Exam-Id": ""},
+            {"X-Exam-Bank": "1201-2026.09-v2", "X-Exam-Id": fresh["id"]},
+            {"X-Exam-Bank": BLUEPRINT["bank_version"], "X-Exam-Id": old["id"]},
+        ]
+        for headers in cases:
+            for path, method, body in (
+                ("/api/exam", "PATCH", {"question_id": self.bank[5]["id"], "answer": self.bank[5]["answer"]}),
+                ("/api/exam/command", "POST", {"command": "raid status"}),
+                ("/api/exam/submit", "POST", {}),
+            ):
+                response = self.client.open(path, method=method, json=body, headers=headers)
+                self.assertEqual(response.status_code, 409)
+                self.assertNotIn("Set-Cookie", response.headers)
+                self.assertEqual(self.client.get_cookie(COOKIE_NAME).value, fresh_cookie)
+        unchanged = self.client.get("/api/exam").get_json()
+        self.assertEqual(unchanged["id"], fresh["id"])
+        self.assertEqual(unchanged["answers"], {})
+        self.assertEqual(unchanged["status"], "active")
+        self.assertFalse(unchanged["raid"]["diagnosed"])
+        self.assertIsNone(unchanged["report"])
 
     def test_objective_coverage_and_domain_mapping_are_enforced(self):
         meta = self.client.get("/api/meta").get_json()
