@@ -8,6 +8,8 @@
 
 The current repository release is **1201-2026.10-v3**, a complete replacement of all 90 questions. This release resets access to older saved attempts: reload the site, enter your name and begin a fresh exam. Answers, flags, lab progress and elapsed time from older forms are not carried over. Automatic AWS deployment is enabled; GitHub Actions validates and deploys changes to the application.
 
+Deployment verified on **2 October 2026**: application commit `301c138`, [successful test and deploy pipeline](https://github.com/Revelation69/cyber/actions/runs/37057436550). All 30 backend tests and 5 frontend controller tests passed. Live checks confirmed the complete v3 bank, retirement of a saved v2 attempt, fresh progress and timer, stale-tab protection, grading and a named mock certificate. Browser visual verification was unavailable because of the browser access policy.
+
 ## Run the simulator locally
 
 ```bash
