@@ -1,6 +1,20 @@
-# Deployment record — 26 September 2026
+# Teardown — 3 October 2026
 
-Live app: **http://35.178.246.210**
+The user requested destruction of all AWS resources created for this simulator. Account `727646487479`, region `eu-west-2`.
+
+- Disabled GitHub deployments (`AWS_DEPLOY_ENABLED=false`) and removed the five obsolete deployment-target variables. No workflow deployment was active.
+- Stopped the host and deleted CloudFormation stack `core1-simulator`; AWS confirmed `DELETE_COMPLETE`.
+- Deleted the retained data volume `vol-0d9d0dbb14934f251`, including saved attempts and on-disk backups, and force-deleted ECR repository `core1-simulator-simulator` with its images.
+- Verified removal of the instance, root/data disks, Elastic IP allocation, VPC, deployment roles, GitHub OIDC provider and SSM document. CloudFormation confirmed deletion of all other managed stack resources. No snapshots of either disk remained.
+- Checked that no unrelated IAM role depended on the stack-created GitHub OIDC provider before deletion. Unrelated AWS resources were left untouched.
+
+The service is offline. The source and infrastructure templates remain in GitHub for local use or deliberate future reprovisioning. The records below describe former deployments, not live resources.
+
+---
+
+# Deployment record (historical) — 26 September 2026
+
+Former app address: `http://35.178.246.210` (released; no longer this project)
 
 Repository: [Revelation69/cyber](https://github.com/Revelation69/cyber). Local checkout: /Users/michaelajala/Documents/cyber; simulator source is under simulator/.
 
